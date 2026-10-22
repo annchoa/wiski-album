@@ -1,0 +1,45 @@
+{
+	"name": "wiski",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "run-p type-check \"build-only {@}\" --",
+		"preview": "vite preview",
+		"test:unit": "vitest",
+		"build-only": "vite build",
+		"type-check": "node node_modules/vue-tsc/bin/vue-tsc.js --build",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write ."
+	},
+	"dependencies": {
+		"@lucide/vue": "^1.61.0",
+		"class-variance-authority": "^0.7.1",
+		"cn": "^0.5.0",
+		"vue": "^3.5.42"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.6.2",
+		"@tailwindcss/vite": "^4.3.3",
+		"@testing-library/jest-dom": "^7.0.1",
+		"@testing-library/vue": "^8.1.0",
+		"@tsconfig/node24": "^24.0.5",
+		"@types/node": "^24.13.4",
+		"@vitejs/plugin-vue": "^6.0.8",
+		"@vue/tsconfig": "^0.9.1",
+		"happy-dom": "^21.0.4",
+		"npm-run-all2": "^9.0.3",
+		"tailwindcss": "^4.3.3",
+		"tw-animate-css": "^1.4.0",
+		"typescript": "~6.0.0",
+		"vite": "^8.2.2",
+		"vite-plugin-vue-devtools": "^8.2.1",
+		"vitest": "^4.1.11",
+		"vue-tsc": "^3.3.11"
+	},
+	"engines": {
+		"node": "^22.18.0 || >=24.12.0"
+	}
+}

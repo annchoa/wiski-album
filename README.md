@@ -1,16 +1,20 @@
 # wiski
 
-Frontend Vue 3 + TypeScript, construido con Bun y shadcn-vue (Tailwind v4). Todo el flujo de trabajo corre dentro de Docker; no hace falta tener Bun instalado en el host.
+Vue 3 + TypeScript frontend, built with Bun and shadcn-vue (Tailwind v4). The whole workflow runs inside Docker; Bun does not need to be installed on the host.
 
-## Desarrollo
+## Design
+
+The UI design lives in the Penpot project named `wiski` (file id `0f3fb038-01f9-8046-8008-c9b32eb8336d`), all of it, whatever pages it has. It is the source of truth for layout, colors and typography.
+
+## Development
 
 ```sh
 docker compose up
 ```
 
-Esto expone la app en http://localhost:5173 con hot-reload. El código se monta como bind mount; `node_modules` vive en un volumen nombrado aparte para no chocar con el `node_modules` instalado dentro de la imagen.
+This exposes the app at http://localhost:5173 with hot-reload. The code is bind-mounted; `node_modules` lives in a separate named volume so it does not clash with the `node_modules` installed inside the image.
 
-Para correr comandos sueltos dentro del contenedor (con el servicio ya levantado):
+To run one-off commands inside the container (with the service already up):
 
 ```sh
 docker compose exec dev bun run test:unit
@@ -18,27 +22,27 @@ docker compose exec dev bun run type-check
 docker compose exec dev bun run check   # biome lint + format
 ```
 
-Para instalar una dependencia nueva:
+To install a new dependency:
 
 ```sh
-docker compose exec dev bun add <paquete>
-docker compose build   # para que quede fijada en la imagen
+docker compose exec dev bun add <package>
+docker compose build   # to pin it in the image
 ```
 
-## Type-checking y Bun
+## Type-checking and Bun
 
-`vue-tsc` no resuelve los módulos `.vue` correctamente cuando se ejecuta bajo el runtime de Bun ([vuejs/language-tools#6090](https://github.com/vuejs/language-tools/issues/6090)). Por eso la imagen instala Node.js además de Bun, y el script `type-check` invoca `vue-tsc` explícitamente con `node` en vez de con `bunx`/`bun run`. El resto del proyecto (dev server, tests, build) corre sobre Bun sin problema.
+`vue-tsc` does not resolve `.vue` modules correctly when run under the Bun runtime ([vuejs/language-tools#6090](https://github.com/vuejs/language-tools/issues/6090)). That is why the image installs Node.js alongside Bun, and why the `type-check` script invokes `vue-tsc` explicitly with `node` instead of `bunx`/`bun run`. The rest of the project (dev server, tests, build) runs on Bun without problems.
 
-## Componentes UI (shadcn-vue)
+## UI components (shadcn-vue)
 
 ```sh
-docker compose exec dev bunx shadcn-vue@latest add <componente>
+docker compose exec dev bunx shadcn-vue@latest add <component>
 ```
 
-Estilo `vega` (el antiguo "New York"), color base `neutral`, variables CSS para temas (modo oscuro preparado a nivel de CSS, sin selector de UI todavía).
+`vega` style (the former "New York"), `neutral` base color, CSS variables for theming (dark mode prepared at the CSS level, no UI toggle yet).
 
-## Convenciones
+## Conventions
 
-- Lint y formato: [Biome](https://biomejs.dev/) (comillas simples, sin punto y coma). `bun run check` aplica fixes.
-- Tests: [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/docs/vue-testing-library/intro/), entorno `happy-dom`.
-- Alias de imports: `@/` → `src/`.
+- Lint and format: [Biome](https://biomejs.dev/) (single quotes, no semicolons). `bun run check` applies fixes.
+- Tests: [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/docs/vue-testing-library/intro/), `happy-dom` environment.
+- Import alias: `@/` → `src/`.

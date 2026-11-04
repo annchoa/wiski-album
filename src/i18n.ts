@@ -11,6 +11,35 @@ const messages = {
 			subheading: 'Elige el formato que mejor cuenta tu historia.',
 			create: 'Crear {name}',
 		},
+		editor: {
+			uploadHint: 'Sube aquí tus fotos',
+			upload: 'Subir fotos',
+			trash: 'Papelera',
+			previousPage: 'Página anterior',
+			nextPage: 'Página siguiente',
+			photos: 'Fotos',
+			sort: {
+				vertical: 'Verticales primero',
+				horizontal: 'Horizontales primero',
+			},
+			worksheet: 'Hoja de trabajo',
+			templates: {
+				label: 'Plantillas',
+				'full-bleed': 'A sangre completa',
+				framed: 'Con margen',
+				stacked: 'Apiladas',
+				'side-by-side': 'Lado a lado',
+				'large-and-two-small': 'Una grande y dos pequeñas',
+				'grid-of-four': 'Cuadrícula de cuatro',
+			},
+			changeProduct: {
+				title: 'Cambiar de producto',
+				message:
+					'Cambiar de producto reiniciará tus páginas. Tus fotos se conservan.',
+				cancel: 'Cancelar',
+				confirm: 'Cambiar',
+			},
+		},
 		specs: {
 			size: '{width} × {height} cm',
 			cover: { hard: 'Tapa dura', soft: 'Tapa blanda' },
@@ -35,6 +64,32 @@ const messages = {
 			heading: 'Create your photobook',
 			subheading: 'Choose the format that best tells your story.',
 			create: 'Create {name}',
+		},
+		editor: {
+			uploadHint: 'Upload your photos here',
+			upload: 'Upload photos',
+			trash: 'Trash',
+			previousPage: 'Previous page',
+			nextPage: 'Next page',
+			photos: 'Photos',
+			sort: { vertical: 'Vertical first', horizontal: 'Horizontal first' },
+			worksheet: 'Worksheet',
+			templates: {
+				label: 'Templates',
+				'full-bleed': 'Full bleed',
+				framed: 'Framed',
+				stacked: 'Stacked',
+				'side-by-side': 'Side by side',
+				'large-and-two-small': 'One large and two small',
+				'grid-of-four': 'Grid of four',
+			},
+			changeProduct: {
+				title: 'Change product',
+				message:
+					'Changing product will reset your pages. Your photos are kept.',
+				cancel: 'Cancel',
+				confirm: 'Change',
+			},
 		},
 		specs: {
 			size: '{width} × {height} cm',

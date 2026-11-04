@@ -30,3 +30,9 @@ export const products: Product[] = [
 		discountPercent: 40,
 	},
 ]
+
+export function getProduct(id: string): Product {
+	const product = products.find((candidate) => candidate.id === id)
+	if (!product) throw new Error(`Unknown product: ${id}`)
+	return product
+}

@@ -1,10 +1,16 @@
 import { fireEvent, render, screen, within } from '@testing-library/vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory } from 'vue-router'
 import App from '../App.vue'
 import { createWikiI18n } from '../i18n'
+import { createWikiRouter } from '../router'
+import HomeView from '../views/HomeView.vue'
 
 function renderApp() {
-	return render(App, { global: { plugins: [createWikiI18n()] } })
+	const router = createWikiRouter(createMemoryHistory())
+	return render(HomeView, {
+		global: { plugins: [createWikiI18n(), router] },
+	})
 }
 
 describe('Home screen', () => {
@@ -76,14 +82,30 @@ describe('Home screen', () => {
 		expect(moment.getByText('-40%')).toBeInTheDocument()
 	})
 
-	it('links each photobook to its canvas', () => {
+	it('links each photobook to its worksheet', () => {
 		renderApp()
 		expect(
 			screen.getByRole('link', { name: 'Crear Wiski Ruta' }),
-		).toHaveAttribute('href', '/canvas/wiski-route')
+		).toHaveAttribute('href', '/worksheet/wiski-route')
 		expect(
 			screen.getByRole('link', { name: 'Crear Wiski Momento' }),
-		).toHaveAttribute('href', '/canvas/wiski-moment')
+		).toHaveAttribute('href', '/worksheet/wiski-moment')
+	})
+})
+
+describe('Navigation', () => {
+	it('opens the worksheet through the router instead of reloading the page', async () => {
+		const router = createWikiRouter(createMemoryHistory())
+		await router.push('/')
+		render(App, { global: { plugins: [createWikiI18n(), router] } })
+
+		await fireEvent.click(
+			screen.getByRole('link', { name: 'Crear Wiski Momento' }),
+		)
+
+		await vi.waitFor(() =>
+			expect(router.currentRoute.value.path).toBe('/worksheet/wiski-moment'),
+		)
 	})
 })
 
@@ -110,7 +132,7 @@ describe('Language selector', () => {
 		expect(route.getByText('20 pages')).toBeInTheDocument()
 		expect(
 			route.getByRole('link', { name: 'Create Wiski Route' }),
-		).toHaveAttribute('href', '/canvas/wiski-route')
+		).toHaveAttribute('href', '/worksheet/wiski-route')
 	})
 
 	it('translates the intro copy', async () => {

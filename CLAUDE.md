@@ -4,10 +4,20 @@
 
 Before building or changing UI, read the Penpot project `wiski` through the Penpot MCP tools; [README.md](README.md#design) has its id.
 
+Design desktop screens at 1440×768 so the page never scrolls; only inner areas (asset panel, lists) may scroll. Mobile and tablet are out of scope until requested.
+
+## UI text
+
+Every user-visible string, `aria-label` and tooltip goes through `src/i18n.ts` in `es` and `en`, even where no language switch exists yet. Editor controls are icon-only: the text lives in the `aria-label` and the tooltip.
+
 ## Penpot API gotchas
 
 - `setParentIndex(i)` counts from the end of `children`. To reorder, call `bringToFront()` on each child in the desired order and print `children.map(c => c.name)` to confirm.
-- Layer names treat `/` as a path separator (shown as ` / `). Keep URLs out of names and put them in a text layer.
+- Layer names treat `/` as a path separator (shown as `/`). Keep URLs out of names and put them in a text layer.
+- `resize()` switches a board to `fix` sizing: set `verticalSizing`/`horizontalSizing` back to `'auto'` afterwards.
+- `insertChild(i, …)` counts from the end like `setParentIndex`: to place a child, `appendChild` the siblings in visual order.
+- `createShapeFromSvg` returns a group with an invisible full-size wrapper rectangle: `resize` the group first, then remove the wrapper.
+- Text wraps differently in Penpot and in the browser (a description fit 2 lines in Penpot, 3 in Chrome): check line counts in the browser before sizing containers.
 
 ## Visual check
 

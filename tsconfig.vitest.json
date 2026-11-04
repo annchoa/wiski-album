@@ -8,8 +8,9 @@
 
 	"compilerOptions": {
 		// Vitest runs in a different environment than the application code.
-		// Adjust lib and types accordingly.
-		"lib": [],
+		// Adjust lib and types accordingly. DOM stays because the application code
+		// imported in tests uses DOM types (File, Image, HTMLInputElement).
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"types": ["node", "happy-dom"],
 
 		// `vue-tsc --build` produces a .tsbuildinfo file for incremental type-checking.

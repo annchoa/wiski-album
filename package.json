@@ -16,12 +16,14 @@
 	},
 	"dependencies": {
 		"@lucide/vue": "^1.68.0",
+		"@vue-dnd-kit/core": "^3.0.1",
 		"@vueuse/core": "^15.0.0",
 		"class-variance-authority": "^0.7.1",
 		"cn": "^0.5.2",
 		"reka-ui": "^2.11.0",
 		"vue": "^3.5.42",
-		"vue-i18n": "^11.4.18"
+		"vue-i18n": "^11.4.18",
+		"vue-router": "^5.4.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.6.2",

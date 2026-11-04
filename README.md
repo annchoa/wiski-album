@@ -36,8 +36,10 @@ docker compose build   # to pin it in the image
 ## UI components (shadcn-vue)
 
 ```sh
-docker compose exec dev bunx shadcn-vue@latest add <component>
+docker compose exec dev bunx --bun shadcn-vue@latest add <component>
 ```
+
+`--bun` is required: the CLI's `undici` needs a newer Node than the one in the image (20), so without it the command crashes on `zstd`.
 
 `vega` style (the former "New York"), `neutral` base color, CSS variables for theming (dark mode prepared at the CSS level, no UI toggle yet).
 

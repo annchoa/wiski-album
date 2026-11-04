@@ -23,6 +23,20 @@ Every user-visible string, `aria-label` and tooltip goes through `src/i18n.ts` i
 
 Styling has no tests: compare the running UI against Penpot. With `make up` running, capture it with `google-chrome --headless=new --no-sandbox --window-size=1440,1200 --virtual-time-budget=10000 --screenshot=<file> http://localhost:5173/` and read the PNG next to `export_shape` of the board. The time budget lets web fonts load; the Vue devtools badge at the bottom is dev-only.
 
+Screenshots cannot show drags, hover states or the file picker. [scripts/](scripts/) drives the headless Chrome over CDP from the host's Node (≥ 22, built-in `WebSocket`): `cdp.mjs` launches it and presses, moves and drops the mouse, `fixtures.mjs` uploads test photos, and `drag-to-trash.mjs` is a runnable example (`node scripts/drag-to-trash.mjs`, with `make up` running). Detect the file picker with `Page.setInterceptFileChooserDialog` through `browser.send`.
+
+## Drag and drop gotchas (`@vue-dnd-kit/core`)
+
+- The draggable element gets `role` and `tabindex`, which overrides a `<li>`'s `listitem` role: make an inner `div` the draggable.
+- The library already dims the dragged element (`opacity: .4`) and the overlay clone copies it: adding your own opacity doubles it.
+- A drop target's `overOverlay` replaces the overlay while the drag is over it (used to shrink the photo over the asset panel and the trash); `snapCenterToCursor` centers the overlay on the cursor.
+
+## Test gotchas
+
+- `onClickOutside` (`@vueuse/core`) ignores a second click in the same macrotask and needs a `pointerdown` first: `await` a `setTimeout` between opening the menu and clicking outside.
+- `reka-ui` dialogs unmount a moment after closing, and the rest of the page stays `aria-hidden` until then: assert with `findBy*` or `vi.waitFor`.
+- Real drags cannot be simulated in happy-dom: check them in Chrome (see Visual check).
+
 ## Docker only
 
 Bun is not installed on the host: run every command inside the `dev` container. The `Makefile` and [README.md](README.md) list the commands.

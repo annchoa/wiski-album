@@ -26,14 +26,24 @@ import {
 	AlertDialogRoot,
 	AlertDialogTitle,
 } from 'reka-ui'
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import {
+	computed,
+	nextTick,
+	onUnmounted,
+	ref,
+	useTemplateRef,
+	watch,
+} from 'vue'
 import { useRouter } from 'vue-router'
 import AssetPanelPhoto from '@/components/worksheet/AssetPanelPhoto.vue'
 import DropArea from '@/components/worksheet/DropArea.vue'
 import PanelOverlay from '@/components/worksheet/PanelOverlay.vue'
 import SlotCell from '@/components/worksheet/SlotCell.vue'
 import TrashOverlay from '@/components/worksheet/TrashOverlay.vue'
-import { pageLayout, thumbLayout } from '@/components/worksheet/templateLayout'
+import {
+	slotsInThumbnail,
+	slotsOnPage,
+} from '@/components/worksheet/templateSlots'
 import { distributeInColumns } from '@/lib/masonry'
 import { getProduct, type Product, products } from '@/lib/products'
 import { readPhoto } from '@/lib/readPhoto'
@@ -91,6 +101,10 @@ function cancelProductChange(isOpen: boolean) {
 	if (!isOpen) pendingProduct.value = null
 }
 
+onUnmounted(() => {
+	for (const { url } of worksheet.photos()) URL.revokeObjectURL(url)
+})
+
 let nextPhotoId = 1
 
 async function addPhotos(files: readonly File[]) {
@@ -118,13 +132,14 @@ function uploadPhotos(event: Event) {
 	addPhotos(files)
 }
 
+const returnedPhotoHighlightMs = 5000
 const highlightedPhotoId = ref<number | null>(null)
 
 async function showReturnedPhoto(photoId: number) {
 	highlightedPhotoId.value = photoId
 	setTimeout(() => {
 		if (highlightedPhotoId.value === photoId) highlightedPhotoId.value = null
-	}, 1500)
+	}, returnedPhotoHighlightMs)
 	await nextTick()
 	document
 		.querySelector(`[data-photo-id="${photoId}"]`)
@@ -140,7 +155,8 @@ function handleDrop({ active, over }: DnDEndEvent) {
 		source.kind === 'slot'
 			? worksheet.pages[source.address.page]?.slots[source.address.slot]
 			: null
-	worksheet.drop(source, target)
+	const deleted = worksheet.drop(source, target)
+	if (deleted) URL.revokeObjectURL(deleted.url)
 	if (returnedPhoto && target.kind !== 'slot')
 		showReturnedPhoto(returnedPhoto.id)
 }
@@ -206,7 +222,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
             class="h-[50px] w-9 overflow-hidden rounded-md border border-neutral-200 bg-white aria-checked:border-2 aria-checked:border-neutral-900"
             @click="worksheet.changeTemplate(worksheet.currentPage, template.id)"
           >
-            <span class="grid h-full w-full" :class="thumbLayout(template.id)">
+            <span class="grid h-full w-full" :class="slotsInThumbnail(template.id)">
               <span v-for="slot in template.slotCount" :key="slot" class="rounded-[1px] bg-neutral-300" />
             </span>
           </button>
@@ -317,7 +333,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
             class="h-[560px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
             :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
           >
-            <ul class="grid h-full w-full" :class="pageLayout(currentTemplateId ?? '')">
+            <ul class="grid h-full w-full" :class="slotsOnPage(currentTemplateId ?? '')">
               <SlotCell
                 v-for="(photo, slotIndex) in worksheet.pages[worksheet.currentPage]?.slots"
                 :key="slotIndex"

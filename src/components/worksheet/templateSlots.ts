@@ -16,10 +16,10 @@ function spacing(templateId: string, framed: string) {
 	return templateId === 'full-bleed' ? 'gap-0 p-0' : framed
 }
 
-export function pageLayout(templateId: string) {
+export function slotsOnPage(templateId: string) {
 	return `${grids[templateId]} ${spacing(templateId, pageSpacing)}`
 }
 
-export function thumbLayout(templateId: string) {
+export function slotsInThumbnail(templateId: string) {
 	return `${grids[templateId]} ${spacing(templateId, thumbSpacing)}`
 }

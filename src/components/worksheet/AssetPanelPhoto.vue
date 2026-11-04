@@ -19,8 +19,8 @@ makeDraggable(useTemplateRef<HTMLElement>('handle'), {
   <li :data-photo-id="photo.id" class="animate-in zoom-in-50 fade-in duration-500">
     <div
       ref="handle"
-      class="cursor-grab outline-none transition-shadow duration-500"
-      :class="{ 'ring-4 ring-neutral-900': highlighted }"
+      class="cursor-grab outline-none"
+      :class="{ 'animate-grow-shrink': highlighted }"
     >
       <img :src="photo.url" :alt="photo.name" class="block w-full" draggable="false" />
     </div>

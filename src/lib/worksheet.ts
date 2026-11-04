@@ -70,6 +70,12 @@ export function createWorksheet(initialProduct: Product) {
 		toggleSort(orientation: Orientation) {
 			state.sort = state.sort === orientation ? null : orientation
 		},
+		photos() {
+			const placed = state.pages.flatMap(({ slots }) =>
+				slots.filter((photo) => photo !== null),
+			)
+			return [...state.assetPanel, ...placed]
+		},
 		sortedAssetPanel() {
 			const first = state.sort
 			if (!first) return [...state.assetPanel]
@@ -117,7 +123,8 @@ export function createWorksheet(initialProduct: Product) {
 		},
 		trash(photoId: number) {
 			const photoIndex = state.assetPanel.findIndex(({ id }) => id === photoId)
-			if (photoIndex >= 0) state.assetPanel.splice(photoIndex, 1)
+			if (photoIndex < 0) return undefined
+			return state.assetPanel.splice(photoIndex, 1)[0]
 		},
 		drop(source: DragSource, target: DropTarget) {
 			if (source.kind === 'asset-panel' && target.kind === 'slot') {
@@ -130,8 +137,9 @@ export function createWorksheet(initialProduct: Product) {
 				this.returnToAssetPanel(source.address)
 			}
 			if (source.kind === 'asset-panel' && target.kind === 'trash') {
-				this.trash(source.photoId)
+				return this.trash(source.photoId)
 			}
+			return undefined
 		},
 		place(photoId: number, address: SlotAddress) {
 			const photoIndex = state.assetPanel.findIndex(({ id }) => id === photoId)

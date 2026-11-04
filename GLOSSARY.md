@@ -29,7 +29,7 @@ An image the user uploaded.
 _Avoid_: Image, picture, asset
 
 **Template**:
-A predefined arrangement of photo positions on a Page.
+A predefined set of Slots on a Page: it fixes how many Slots there are and where each one sits.
 _Avoid_: Layout, preset
 
 **Slot**:

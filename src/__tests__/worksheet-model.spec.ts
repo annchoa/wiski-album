@@ -25,17 +25,6 @@ function aPhoto(id: number): Photo {
 }
 
 describe('Worksheet model', () => {
-	it('moves a photo from the asset panel to an empty slot', () => {
-		const worksheet = createWorksheet(momentProduct())
-		const photo = aPhoto(1)
-		worksheet.upload(photo)
-
-		worksheet.place(photo.id, { page: 0, slot: 0 })
-
-		expect(worksheet.assetPanel).toEqual([])
-		expect(worksheet.pages[0]?.slots[0]).toEqual(photo)
-	})
-
 	it('leaves everything as it was when the photo to place is not in the asset panel', () => {
 		const worksheet = createWorksheet(momentProduct())
 		const photo = aPhoto(1)
@@ -59,45 +48,6 @@ describe('Worksheet model', () => {
 
 		expect(worksheet.pages[0]?.slots[0]).toEqual(next)
 		expect(worksheet.assetPanel).toEqual([previous])
-	})
-
-	it('swaps two photos dragged between filled slots', () => {
-		const worksheet = createWorksheet(momentProduct())
-		const first = aPhoto(1)
-		const second = aPhoto(2)
-		worksheet.changeTemplate(0, 'stacked')
-		worksheet.upload(first)
-		worksheet.upload(second)
-		worksheet.place(first.id, { page: 0, slot: 0 })
-		worksheet.place(second.id, { page: 0, slot: 1 })
-
-		worksheet.move({ page: 0, slot: 0 }, { page: 0, slot: 1 })
-
-		expect(worksheet.pages[0]?.slots).toEqual([second, first])
-	})
-
-	it('returns a placed photo to the asset panel', () => {
-		const worksheet = createWorksheet(momentProduct())
-		const photo = aPhoto(1)
-		worksheet.upload(photo)
-		worksheet.place(photo.id, { page: 0, slot: 0 })
-
-		worksheet.returnToAssetPanel({ page: 0, slot: 0 })
-
-		expect(worksheet.pages[0]?.slots[0]).toBeNull()
-		expect(worksheet.assetPanel).toEqual([photo])
-	})
-
-	it('deletes a photo dropped on the trash', () => {
-		const worksheet = createWorksheet(momentProduct())
-		const kept = aPhoto(1)
-		const deleted = aPhoto(2)
-		worksheet.upload(kept)
-		worksheet.upload(deleted)
-
-		worksheet.trash(deleted.id)
-
-		expect(worksheet.assetPanel).toEqual([kept])
 	})
 
 	it('keeps photos already placed on pages when the same photo is trashed from the asset panel', () => {
@@ -218,6 +168,20 @@ describe('Worksheet model', () => {
 		expect(worksheet.currentPage).toBe(0)
 	})
 
+	it('lists every uploaded photo it still holds, in the asset panel or placed on a page', () => {
+		const worksheet = createWorksheet(momentProduct())
+		const inPanel = aPhoto(1)
+		const placed = aPhoto(2)
+		const deleted = aPhoto(3)
+		worksheet.upload(inPanel)
+		worksheet.upload(placed)
+		worksheet.upload(deleted)
+		worksheet.place(placed.id, { page: 0, slot: 0 })
+		worksheet.trash(deleted.id)
+
+		expect(worksheet.photos()).toEqual([inPanel, placed])
+	})
+
 	describe('drop', () => {
 		it('places a photo dragged from the asset panel onto a slot', () => {
 			const worksheet = createWorksheet(momentProduct())
@@ -265,11 +229,38 @@ describe('Worksheet model', () => {
 
 		it('deletes a photo dropped on the trash from the asset panel', () => {
 			const worksheet = createWorksheet(momentProduct())
+			const kept = aPhoto(1)
+			worksheet.upload(kept)
+			worksheet.upload(aPhoto(2))
+
+			worksheet.drop({ kind: 'asset-panel', photoId: 2 }, { kind: 'trash' })
+
+			expect(worksheet.assetPanel).toEqual([kept])
+		})
+
+		it('hands back the photo it deleted so the caller can release it', () => {
+			const worksheet = createWorksheet(momentProduct())
+			const photo = aPhoto(1)
+			worksheet.upload(photo)
+
+			const deleted = worksheet.drop(
+				{ kind: 'asset-panel', photoId: 1 },
+				{ kind: 'trash' },
+			)
+
+			expect(deleted).toEqual(photo)
+		})
+
+		it('hands back nothing when the drop deletes no photo', () => {
+			const worksheet = createWorksheet(momentProduct())
 			worksheet.upload(aPhoto(1))
 
-			worksheet.drop({ kind: 'asset-panel', photoId: 1 }, { kind: 'trash' })
+			const deleted = worksheet.drop(
+				{ kind: 'asset-panel', photoId: 1 },
+				{ kind: 'slot', address: { page: 0, slot: 0 } },
+			)
 
-			expect(worksheet.assetPanel).toEqual([])
+			expect(deleted).toBeUndefined()
 		})
 
 		it('keeps a slot photo in the asset panel when dropped on the trash', () => {

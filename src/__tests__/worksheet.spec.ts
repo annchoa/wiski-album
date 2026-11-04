@@ -83,6 +83,26 @@ describe('Worksheet screen', () => {
 		).toBeInTheDocument()
 	})
 
+	it('releases the uploaded photos when the screen is left', async () => {
+		const router = createWikiRouter(createMemoryHistory())
+		await router.push('/worksheet/wiski-moment')
+		const { unmount } = render(App, {
+			global: { plugins: [createWikiI18n(), router] },
+		})
+		await fireEvent.change(screen.getByLabelText('Subir fotos'), {
+			target: {
+				files: [new File(['a'], 'beach.jpg', { type: 'image/jpeg' })],
+			},
+		})
+		await screen.findByRole('img', { name: 'beach.jpg' })
+		const release = vi.spyOn(URL, 'revokeObjectURL')
+
+		unmount()
+
+		expect(release).toHaveBeenCalledWith('blob:beach.jpg')
+		release.mockRestore()
+	})
+
 	it('opens the file picker from the hint shown while the asset panel is empty', async () => {
 		await renderWorksheet('/worksheet/wiski-moment')
 		const openPicker = vi

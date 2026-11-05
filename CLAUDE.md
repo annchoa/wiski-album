@@ -10,6 +10,10 @@ Design desktop screens at 1440×768 so the page never scrolls; only inner areas 
 
 Every user-visible string, `aria-label` and tooltip goes through `src/i18n.ts` in `es` and `en`, even where no language switch exists yet. Editor controls are icon-only: the text lives in the `aria-label` and the tooltip.
 
+## Icons
+
+Use `@phosphor-icons/vue` in the regular weight (the default). Phosphor has no vertical rectangle: rotate `PhRectangle` 90°. The Penpot design still draws lucide shapes until its icons are redrawn: pick the Phosphor equivalent.
+
 ## Penpot API gotchas
 
 - `setParentIndex(i)` counts from the end of `children`. To reorder, call `bringToFront()` on each child in the desired order and print `children.map(c => c.name)` to confirm.
@@ -25,6 +29,8 @@ Styling has no tests: compare the running UI against Penpot. With `make up` runn
 
 Screenshots cannot show drags, hover states or the file picker. [scripts/](scripts/) drives the headless Chrome over CDP from the host's Node (≥ 22, built-in `WebSocket`): `cdp.mjs` launches it and presses, moves and drops the mouse, `fixtures.mjs` uploads test photos, and `drag-to-trash.mjs` is a runnable example (`node scripts/drag-to-trash.mjs`, with `make up` running). Detect the file picker with `Page.setInterceptFileChooserDialog` through `browser.send`.
 
+After `bun add` or `bun remove`, Vite re-optimizes on the first page load and reloads it mid-script: open the page once and wait before running a script, or its first query returns `undefined`. A failed script leaves its Chrome running on port 9333: close it with `pkill -f "[w]iski-cdp-profile"` (the brackets stop `pkill` from matching its own shell).
+
 ## Drag and drop gotchas (`@vue-dnd-kit/core`)
 
 - The draggable element gets `role` and `tabindex`, which overrides a `<li>`'s `listitem` role: make an inner `div` the draggable.
@@ -36,6 +42,7 @@ Screenshots cannot show drags, hover states or the file picker. [scripts/](scrip
 - `onClickOutside` (`@vueuse/core`) ignores a second click in the same macrotask and needs a `pointerdown` first: `await` a `setTimeout` between opening the menu and clicking outside.
 - `reka-ui` dialogs unmount a moment after closing, and the rest of the page stays `aria-hidden` until then: assert with `findBy*` or `vi.waitFor`.
 - Real drags cannot be simulated in happy-dom: check them in Chrome (see Visual check).
+- happy-dom has no layout: `useElementSize` reads `NaN` or `0` and its `ResizeObserver` never reports a size. Stub `ResizeObserver` so it reports one on `observe`, as `slotSizedInPixels` does in `SlotCell.spec.ts`, and pass `box: 'border-box'` to `useElementSize` (the default content-box path turns empty padding strings into `NaN`).
 
 ## Docker only
 

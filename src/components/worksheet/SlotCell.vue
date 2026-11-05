@@ -15,14 +15,14 @@ import { onClickOutside, onKeyStroke, useElementSize } from '@vueuse/core'
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { positionAfterDrag } from '@/lib/dragPosition'
 import type { Point } from '@/lib/geometry'
-import { effectiveResolution, isLowResolution } from '@/lib/resolution'
-import type { Photo, SlotAddress, SlotView } from '@/lib/worksheet'
+import { isLowResolution, printResolution } from '@/lib/resolution'
+import type { Photo, PositionAndZoom, SlotAddress } from '@/lib/worksheet'
 
 const props = withDefaults(
 	defineProps<{
 		photo: Photo | null
 		address: SlotAddress
-		view: SlotView
+		positionAndZoom: PositionAndZoom
 		// How many cm one pixel of the page is; 0 while the page has no size yet.
 		cmPerPixel?: number
 	}>(),
@@ -62,13 +62,13 @@ const { width: slotWidth, height: slotHeight } = useElementSize(
 )
 const lowResolution = computed(() => {
 	if (!props.photo) return null
-	const resolution = effectiveResolution({
+	const resolution = printResolution({
 		photo: props.photo,
 		slotCm: {
 			width: slotWidth.value * props.cmPerPixel,
 			height: slotHeight.value * props.cmPerPixel,
 		},
-		zoom: props.view.zoom,
+		zoom: props.positionAndZoom.zoom,
 	})
 	return resolution !== null && isLowResolution(resolution)
 		? Math.round(resolution)
@@ -84,11 +84,11 @@ const moveStep = 0.05
 const zoomPerWheelDelta = 0.0025
 
 function zoomBy(change: number) {
-	emit('zoom', props.view.zoom + change)
+	emit('zoom', props.positionAndZoom.zoom + change)
 }
 
 function moveBy(dx: number, dy: number) {
-	const { x, y } = props.view.position
+	const { x, y } = props.positionAndZoom.position
 	emit('position', { x: x + dx, y: y + dy })
 }
 
@@ -128,8 +128,8 @@ function pan(event: PointerEvent) {
 	emit(
 		'position',
 		positionAfterDrag({
-			position: props.view.position,
-			zoom: props.view.zoom,
+			position: props.positionAndZoom.position,
+			zoom: props.positionAndZoom.zoom,
 			photo: props.photo,
 			slotPx: { width: slotWidth.value, height: slotHeight.value },
 			drag: {
@@ -164,7 +164,7 @@ const controls = [
 ]
 
 const photoStyle = computed(() => {
-	const { position, zoom } = props.view
+	const { position, zoom } = props.positionAndZoom
 	const focus = `${position.x * 100}% ${position.y * 100}%`
 	return {
 		objectPosition: focus,

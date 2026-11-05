@@ -5,7 +5,7 @@ import { defineComponent, h, nextTick, ref } from 'vue'
 import SlotCell from '../components/worksheet/SlotCell.vue'
 import { createWikiI18n } from '../i18n'
 import type { Point } from '../lib/geometry'
-import type { Photo, SlotView } from '../lib/worksheet'
+import type { Photo, PositionAndZoom } from '../lib/worksheet'
 
 const photo: Photo = {
 	id: 1,
@@ -44,7 +44,7 @@ function slotSizedInPixels(size: number) {
 }
 
 function renderSlot(
-	view: SlotView,
+	positionAndZoom: PositionAndZoom,
 	handlers: {
 		onZoom?: (zoom: number) => void
 		onReset?: () => void
@@ -60,7 +60,7 @@ function renderSlot(
 				h(SlotCell, {
 					photo: shownPhoto.value,
 					address: { page: 0, slot: 0 },
-					view,
+					positionAndZoom,
 					...handlers,
 				}),
 			),
@@ -81,7 +81,7 @@ describe('Slot cell', () => {
 		Object.assign(window, { ResizeObserver: realResizeObserver })
 	})
 
-	it('shows its photo at the position and zoom of its view', () => {
+	it('shows its photo at its position and zoom', () => {
 		renderSlot({ position: { x: 0.2, y: 0.8 }, zoom: 2 })
 
 		const image = screen.getByRole('img', { name: 'beach.jpg' })

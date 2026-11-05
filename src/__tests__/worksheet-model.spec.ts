@@ -33,9 +33,9 @@ describe('Worksheet model', () => {
 		worksheet.setZoom({ page: 0, slot: 0 }, 2)
 		worksheet.setPosition({ page: 0, slot: 0 }, { x: 0.1, y: 0.9 })
 
-		worksheet.resetSlotView({ page: 0, slot: 0 })
+		worksheet.resetPositionAndZoom({ page: 0, slot: 0 })
 
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 1,
 		})
@@ -52,7 +52,7 @@ describe('Worksheet model', () => {
 		worksheet.changeProduct(routeProduct())
 		worksheet.place(photo.id, { page: 0, slot: 0 })
 
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 1,
 		})
@@ -68,7 +68,7 @@ describe('Worksheet model', () => {
 
 		worksheet.changeTemplate(0, 'side-by-side')
 
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 1,
 		})
@@ -86,7 +86,7 @@ describe('Worksheet model', () => {
 
 		worksheet.place(replaced.id, { page: 0, slot: 1 })
 
-		expect(worksheet.slotView({ page: 0, slot: 1 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 1 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 1,
 		})
@@ -103,7 +103,7 @@ describe('Worksheet model', () => {
 		worksheet.returnToAssetPanel({ page: 0, slot: 0 })
 		worksheet.place(photo.id, { page: 0, slot: 0 })
 
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 1,
 		})
@@ -122,11 +122,11 @@ describe('Worksheet model', () => {
 
 		worksheet.move({ page: 0, slot: 0 }, { page: 0, slot: 1 })
 
-		expect(worksheet.slotView({ page: 0, slot: 1 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 1 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 2,
 		})
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.1, y: 0.9 },
 			zoom: 1,
 		})
@@ -140,7 +140,7 @@ describe('Worksheet model', () => {
 
 		worksheet.setPosition({ page: 0, slot: 0 }, { x: -0.3, y: 1.4 })
 
-		expect(worksheet.slotView({ page: 0, slot: 0 }).position).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 }).position).toEqual({
 			x: 0,
 			y: 1,
 		})
@@ -155,7 +155,7 @@ describe('Worksheet model', () => {
 
 		worksheet.setPosition({ page: 0, slot: 0 }, { x: 0.2, y: 0.8 })
 
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.2, y: 0.8 },
 			zoom: 2,
 		})
@@ -169,7 +169,7 @@ describe('Worksheet model', () => {
 
 		worksheet.setZoom({ page: 0, slot: 0 }, 0.5)
 
-		expect(worksheet.slotView({ page: 0, slot: 0 }).zoom).toBe(1)
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 }).zoom).toBe(1)
 	})
 
 	it('caps the zoom at three times the minimum', () => {
@@ -180,7 +180,7 @@ describe('Worksheet model', () => {
 
 		worksheet.setZoom({ page: 0, slot: 0 }, 5)
 
-		expect(worksheet.slotView({ page: 0, slot: 0 }).zoom).toBe(3)
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 }).zoom).toBe(3)
 	})
 
 	it('zooms the photo in a slot without moving it', () => {
@@ -191,7 +191,7 @@ describe('Worksheet model', () => {
 
 		worksheet.setZoom({ page: 0, slot: 0 }, 2)
 
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 2,
 		})
@@ -204,7 +204,7 @@ describe('Worksheet model', () => {
 
 		worksheet.place(photo.id, { page: 0, slot: 0 })
 
-		expect(worksheet.slotView({ page: 0, slot: 0 })).toEqual({
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
 			position: { x: 0.5, y: 0.5 },
 			zoom: 1,
 		})

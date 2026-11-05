@@ -164,7 +164,7 @@ const currentPageSlots = computed(() => {
 			key: `${address.page}-${page?.templateId}-${slot}`,
 			photo,
 			address,
-			view: worksheet.slotView(address),
+			positionAndZoom: worksheet.positionAndZoom(address),
 		}
 	})
 })
@@ -360,10 +360,10 @@ function handleDrop({ active, over }: DnDEndEvent) {
                 :key="slot.key"
                 :photo="slot.photo"
                 :address="slot.address"
-                :view="slot.view"
+                :position-and-zoom="slot.positionAndZoom"
                 :cm-per-pixel="cmPerPixel"
                 @zoom="(zoom) => worksheet.setZoom(slot.address, zoom)"
-                @reset="worksheet.resetSlotView(slot.address)"
+                @reset="worksheet.resetPositionAndZoom(slot.address)"
                 @position="(position) => worksheet.setPosition(slot.address, position)"
                 @drop="handleDrop"
               />

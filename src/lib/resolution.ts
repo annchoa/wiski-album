@@ -2,7 +2,7 @@ import type { Size } from './geometry'
 
 const cmPerInch = 2.54
 
-export function effectiveResolution({
+export function printResolution({
 	photo,
 	slotCm,
 	zoom,

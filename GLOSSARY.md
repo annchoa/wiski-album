@@ -45,6 +45,12 @@ How much a Photo is enlarged inside its Slot.
 **Slot editing**:
 The mode in which the user adjusts the Position and Zoom of the Photo in a Slot.
 
+**Resolution**:
+The number of pixels per inch with which a Photo prints in its Slot.
+
+**Low resolution**:
+A Resolution too low for the Photo to print sharply in its Slot. The user is warned and may keep it.
+
 **Template strip**:
 The row of Template thumbnails in the top bar from which the user picks the Template for the current Page.
 _Avoid_: Template carousel, template gallery

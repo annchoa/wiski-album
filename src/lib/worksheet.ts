@@ -16,7 +16,7 @@ export interface Page {
 	slots: (Photo | null)[]
 }
 
-export interface SlotView {
+export interface PositionAndZoom {
 	position: Point
 	zoom: number
 }
@@ -48,7 +48,7 @@ function clamp(value: number, min: number, max: number) {
 	return Math.max(min, Math.min(value, max))
 }
 
-function centeredView(): SlotView {
+function centeredPositionAndZoom(): PositionAndZoom {
 	return { position: { x: 0.5, y: 0.5 }, zoom: 1 }
 }
 
@@ -69,7 +69,7 @@ export function createWorksheet(initialProduct: Product) {
 		sort: null as Orientation | null,
 		assetPanel: [] as Photo[],
 		pages: emptyPages(initialProduct),
-		views: {} as Record<number, SlotView>,
+		positionsAndZooms: {} as Record<number, PositionAndZoom>,
 	})
 
 	function photoAt(address: SlotAddress) {
@@ -82,18 +82,21 @@ export function createWorksheet(initialProduct: Product) {
 		)
 	}
 
-	function updateView(address: SlotAddress, change: Partial<SlotView>) {
+	function updatePositionAndZoom(
+		address: SlotAddress,
+		change: Partial<PositionAndZoom>,
+	) {
 		const photo = photoAt(address)
 		if (!photo) return
-		state.views[photo.id] = {
-			...(state.views[photo.id] ?? centeredView()),
+		state.positionsAndZooms[photo.id] = {
+			...(state.positionsAndZooms[photo.id] ?? centeredPositionAndZoom()),
 			...change,
 		}
 	}
 
 	// A Photo that leaves its Slot starts centered and without zoom the next time it lands.
 	function discardViews(photos: Photo[]) {
-		for (const { id } of photos) delete state.views[id]
+		for (const { id } of photos) delete state.positionsAndZooms[id]
 	}
 
 	return Object.assign(state, {
@@ -112,19 +115,22 @@ export function createWorksheet(initialProduct: Product) {
 		toggleSort(orientation: Orientation) {
 			state.sort = state.sort === orientation ? null : orientation
 		},
-		slotView(address: SlotAddress): SlotView {
+		positionAndZoom(address: SlotAddress): PositionAndZoom {
 			const photo = photoAt(address)
-			return (photo && state.views[photo.id]) || centeredView()
+			return (
+				(photo && state.positionsAndZooms[photo.id]) ||
+				centeredPositionAndZoom()
+			)
 		},
 		setZoom(address: SlotAddress, zoom: number) {
-			updateView(address, { zoom: clamp(zoom, minZoom, maxZoom) })
+			updatePositionAndZoom(address, { zoom: clamp(zoom, minZoom, maxZoom) })
 		},
 		setPosition(address: SlotAddress, { x, y }: Point) {
-			updateView(address, {
+			updatePositionAndZoom(address, {
 				position: { x: clamp(x, 0, 1), y: clamp(y, 0, 1) },
 			})
 		},
-		resetSlotView(address: SlotAddress) {
+		resetPositionAndZoom(address: SlotAddress) {
 			const photo = photoAt(address)
 			if (photo) discardViews([photo])
 		},

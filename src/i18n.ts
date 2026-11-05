@@ -23,6 +23,11 @@ const messages = {
 				horizontal: 'Horizontales primero',
 			},
 			worksheet: 'Hoja de trabajo',
+			slotEditing: {
+				zoomOut: 'Alejar',
+				zoomIn: 'Acercar',
+				reset: 'Restablecer posición y zoom',
+			},
 			templates: {
 				label: 'Plantillas',
 				'full-bleed': 'A sangre completa',
@@ -74,6 +79,11 @@ const messages = {
 			photos: 'Photos',
 			sort: { vertical: 'Vertical first', horizontal: 'Horizontal first' },
 			worksheet: 'Worksheet',
+			slotEditing: {
+				zoomOut: 'Zoom out',
+				zoomIn: 'Zoom in',
+				reset: 'Reset position and zoom',
+			},
 			templates: {
 				label: 'Templates',
 				'full-bleed': 'Full bleed',

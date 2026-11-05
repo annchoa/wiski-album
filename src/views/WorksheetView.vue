@@ -146,6 +146,10 @@ async function showReturnedPhoto(photoId: number) {
 		?.scrollIntoView({ block: 'nearest' })
 }
 
+function slotAddress(slot: number) {
+	return { page: worksheet.currentPage, slot }
+}
+
 function handleDrop({ active, over }: DnDEndEvent) {
 	if (active.external) return addPhotos(active.external.files)
 	if (!over) return
@@ -338,7 +342,10 @@ function handleDrop({ active, over }: DnDEndEvent) {
                 v-for="(photo, slotIndex) in worksheet.pages[worksheet.currentPage]?.slots"
                 :key="slotIndex"
                 :photo="photo"
-                :address="{ page: worksheet.currentPage, slot: slotIndex }"
+                :address="slotAddress(slotIndex)"
+                :view="worksheet.slotView(slotAddress(slotIndex))"
+                @zoom="(zoom) => worksheet.setZoom(slotAddress(slotIndex), zoom)"
+                @reset="worksheet.resetSlotView(slotAddress(slotIndex))"
                 @drop="handleDrop"
               />
             </ul>

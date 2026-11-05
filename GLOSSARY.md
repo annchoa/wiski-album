@@ -33,8 +33,17 @@ A predefined set of Slots on a Page: it fixes how many Slots there are and where
 _Avoid_: Layout, preset
 
 **Slot**:
-A photo position within a Template, empty or filled.
+A place for one Photo within a Template, empty or filled.
 _Avoid_: Frame, placeholder, box
+
+**Position**:
+Where a Photo sits inside its Slot.
+
+**Zoom**:
+How much a Photo is enlarged inside its Slot.
+
+**Slot editing**:
+The mode in which the user adjusts the Position and Zoom of the Photo in a Slot.
 
 **Template strip**:
 The row of Template thumbnails in the top bar from which the user picks the Template for the current Page.

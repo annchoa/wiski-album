@@ -1,4 +1,4 @@
-// Example: place a photo on a slot, open slot editing and press zoom in, zoom out and reset.
+// Example: place a photo on a slot, open slot editing and press zoom in, an arrow, zoom out and reset.
 // Needs `make up` running. Usage: node scripts/slot-editing.mjs [screenshot.png]
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -40,7 +40,22 @@ const press = async (label) => {
 }
 await press('Acercar')
 await press('Acercar')
+const pressKey = async (key) => {
+	await browser.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key })
+	await browser.send('Input.dispatchKeyEvent', { type: 'keyUp', key })
+	await browser.sleep(200)
+	console.log(`${key}:`, await photoStyle())
+}
+await pressKey('ArrowRight')
 await press('Alejar')
+const [hoverX, hoverY] = await centerOf('button[aria-label="Acercar"]')
+await browser.send('Input.dispatchMouseEvent', {
+	type: 'mouseMoved',
+	x: hoverX,
+	y: hoverY,
+	buttons: 0,
+})
+await browser.sleep(300)
 await browser.screenshot(screenshotFile)
 await press('Restablecer posición y zoom')
 console.log('screenshot after zoom:', screenshotFile)

@@ -346,6 +346,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
                 :view="worksheet.slotView(slotAddress(slotIndex))"
                 @zoom="(zoom) => worksheet.setZoom(slotAddress(slotIndex), zoom)"
                 @reset="worksheet.resetSlotView(slotAddress(slotIndex))"
+                @position="(position) => worksheet.setPosition(slotAddress(slotIndex), position)"
                 @drop="handleDrop"
               />
             </ul>

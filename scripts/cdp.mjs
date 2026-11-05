@@ -32,6 +32,8 @@ export async function launch(url, { width = 1440, height = 768 } = {}) {
 			'--no-sandbox',
 			`--window-size=${width},${height}`,
 			`--remote-debugging-port=${debuggingPort}`,
+			// Headless reports no hover or fine pointer, so Tailwind's `hover:` variants would never apply.
+			'--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4',
 			`--user-data-dir=${join(tmpdir(), 'wiski-cdp-profile')}`,
 			'about:blank',
 		],

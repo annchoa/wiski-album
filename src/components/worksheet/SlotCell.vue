@@ -18,6 +18,7 @@ const emit = defineEmits<{
 	drop: [event: DnDEndEvent]
 	zoom: [zoom: number]
 	reset: []
+	position: [position: SlotView['position']]
 }>()
 
 makeDraggable(useTemplateRef<HTMLElement>('handle'), {
@@ -43,6 +44,26 @@ onClickOutside(cell, () => {
 	isEditing.value = false
 })
 const zoomStep = 0.25
+const moveStep = 0.05
+const arrowMoves = {
+	ArrowRight: { x: -moveStep, y: 0 },
+	ArrowLeft: { x: moveStep, y: 0 },
+	ArrowUp: { x: 0, y: moveStep },
+	ArrowDown: { x: 0, y: -moveStep },
+}
+for (const [key, move] of Object.entries(arrowMoves)) {
+	onKeyStroke(key, () => {
+		if (!isEditing.value) return
+		const { x, y } = props.view.position
+		emit('position', { x: x + move.x, y: y + move.y })
+	})
+}
+const keyZooms = { '+': zoomStep, '-': -zoomStep }
+for (const [key, change] of Object.entries(keyZooms)) {
+	onKeyStroke(key, () => {
+		if (isEditing.value) emit('zoom', props.view.zoom + change)
+	})
+}
 const controls = [
 	{
 		label: 'editor.slotEditing.zoomOut',
@@ -98,10 +119,10 @@ const stateClasses = computed(() =>
         type="button"
         :aria-label="$t(control.label)"
         :title="$t(control.label)"
-        class="flex size-8 items-center justify-center rounded-full"
+        class="group/control flex size-8 cursor-pointer items-center justify-center rounded-full outline-none transition-[background-color,transform] duration-150 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-neutral-900 active:scale-95 motion-reduce:transition-none"
         @click="control.run"
       >
-        <component :is="control.icon" aria-hidden="true" class="size-4" />
+        <component :is="control.icon" aria-hidden="true" class="size-4 transition-transform duration-150 group-hover/control:scale-115 motion-reduce:transition-none" />
       </button>
     </div>
   </li>

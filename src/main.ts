@@ -8,5 +8,5 @@ import { createWikiRouter } from './router'
 
 createApp(App)
 	.use(createWikiI18n())
-	.use(createWikiRouter(createWebHistory()))
+	.use(createWikiRouter(createWebHistory(import.meta.env.BASE_URL)))
 	.mount('#app')

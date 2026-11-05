@@ -16,7 +16,11 @@ const photo: Photo = {
 
 function renderSlot(
 	view: SlotView,
-	handlers: { onZoom?: (zoom: number) => void; onReset?: () => void } = {},
+	handlers: {
+		onZoom?: (zoom: number) => void
+		onReset?: () => void
+		onPosition?: (position: { x: number; y: number }) => void
+	} = {},
 ) {
 	const Host = defineComponent(
 		() => () =>
@@ -107,5 +111,63 @@ describe('Slot cell', () => {
 		)
 
 		expect(onReset).toHaveBeenCalledOnce()
+	})
+
+	it('moves the photo to the right with the right arrow', async () => {
+		const onPosition = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 2 }, { onPosition })
+		await fireEvent.dblClick(screen.getByRole('img', { name: 'beach.jpg' }))
+
+		await fireEvent.keyDown(document.body, { key: 'ArrowRight' })
+
+		expect(onPosition).toHaveBeenCalledWith({ x: 0.45, y: 0.5 })
+	})
+
+	it('ignores the arrows while the slot is not being edited', async () => {
+		const onPosition = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 2 }, { onPosition })
+
+		await fireEvent.keyDown(document.body, { key: 'ArrowRight' })
+
+		expect(onPosition).not.toHaveBeenCalled()
+	})
+
+	it.each([
+		['ArrowLeft', { x: 0.55, y: 0.5 }],
+		['ArrowUp', { x: 0.5, y: 0.55 }],
+		['ArrowDown', { x: 0.5, y: 0.45 }],
+	])('moves the photo in the direction of %s', async (key, expected) => {
+		const onPosition = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 2 }, { onPosition })
+		await fireEvent.dblClick(screen.getByRole('img', { name: 'beach.jpg' }))
+
+		await fireEvent.keyDown(document.body, { key })
+
+		expect(onPosition).toHaveBeenCalledWith(expected)
+	})
+
+	it.each([
+		['+', 1.25],
+		['-', 1.75],
+	])('changes the zoom a quarter with %s', async (key, expected) => {
+		const onZoom = vi.fn()
+		renderSlot(
+			{ position: { x: 0.5, y: 0.5 }, zoom: key === '+' ? 1 : 2 },
+			{ onZoom },
+		)
+		await fireEvent.dblClick(screen.getByRole('img', { name: 'beach.jpg' }))
+
+		await fireEvent.keyDown(document.body, { key })
+
+		expect(onZoom).toHaveBeenCalledWith(expected)
+	})
+
+	it('ignores the zoom keys while the slot is not being edited', async () => {
+		const onZoom = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 }, { onZoom })
+
+		await fireEvent.keyDown(document.body, { key: '+' })
+
+		expect(onZoom).not.toHaveBeenCalled()
 	})
 })

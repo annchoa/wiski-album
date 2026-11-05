@@ -23,6 +23,7 @@ const messages = {
 				horizontal: 'Horizontales primero',
 			},
 			worksheet: 'Hoja de trabajo',
+			lowResolution: 'Baja resolución: {ppp} ppp',
 			slotEditing: {
 				zoomOut: 'Alejar',
 				zoomIn: 'Acercar',
@@ -79,6 +80,7 @@ const messages = {
 			photos: 'Photos',
 			sort: { vertical: 'Vertical first', horizontal: 'Horizontal first' },
 			worksheet: 'Worksheet',
+			lowResolution: 'Low resolution: {ppp} ppp',
 			slotEditing: {
 				zoomOut: 'Zoom out',
 				zoomIn: 'Zoom in',

@@ -1,9 +1,6 @@
-const cmPerInch = 2.54
+import type { Size } from './geometry'
 
-interface Size {
-	width: number
-	height: number
-}
+const cmPerInch = 2.54
 
 export function effectiveResolution({
 	photo,

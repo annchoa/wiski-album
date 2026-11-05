@@ -1,9 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/vue'
 import { DnDProvider } from '@vue-dnd-kit/core'
-import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { defineComponent, h, nextTick, ref } from 'vue'
 import SlotCell from '../components/worksheet/SlotCell.vue'
 import { createWikiI18n } from '../i18n'
+import type { Point } from '../lib/geometry'
 import type { Photo, SlotView } from '../lib/worksheet'
 
 const photo: Photo = {
@@ -14,19 +15,50 @@ const photo: Photo = {
 	height: 3000,
 }
 
+const realResizeObserver = window.ResizeObserver
+
+// happy-dom has no layout, so a test says what the browser's ResizeObserver would report.
+function slotSizedInPixels(size: number) {
+	class SizedResizeObserver {
+		constructor(private callback: ResizeObserverCallback) {}
+		observe() {
+			setTimeout(() => {
+				const box = [{ inlineSize: size, blockSize: size }]
+				this.callback(
+					[
+						{
+							contentRect: { width: size, height: size },
+							borderBoxSize: box,
+							contentBoxSize: box,
+						} as unknown as ResizeObserverEntry,
+					],
+					this as unknown as ResizeObserver,
+				)
+			})
+		}
+		unobserve() {}
+		disconnect() {}
+	}
+	vi.stubGlobal('ResizeObserver', SizedResizeObserver)
+	Object.assign(window, { ResizeObserver: SizedResizeObserver })
+}
+
 function renderSlot(
 	view: SlotView,
 	handlers: {
 		onZoom?: (zoom: number) => void
 		onReset?: () => void
-		onPosition?: (position: { x: number; y: number }) => void
+		onPosition?: (position: Point) => void
+		cmPerPixel?: number
 	} = {},
 ) {
+	// The slot's photo can change after mounting, as when a photo is dragged out of it.
+	const shownPhoto = ref<Photo | null>(photo)
 	const Host = defineComponent(
 		() => () =>
 			h(DnDProvider, null, () =>
 				h(SlotCell, {
-					photo,
+					photo: shownPhoto.value,
 					address: { page: 0, slot: 0 },
 					view,
 					...handlers,
@@ -34,9 +66,21 @@ function renderSlot(
 			),
 	)
 	render(Host, { global: { plugins: [createWikiI18n()] } })
+	return {
+		async showPhoto(next: Photo | null) {
+			shownPhoto.value = next
+			await nextTick()
+		},
+	}
 }
 
 describe('Slot cell', () => {
+	afterEach(() => {
+		vi.restoreAllMocks()
+		vi.unstubAllGlobals()
+		Object.assign(window, { ResizeObserver: realResizeObserver })
+	})
+
 	it('shows its photo at the position and zoom of its view', () => {
 		renderSlot({ position: { x: 0.2, y: 0.8 }, zoom: 2 })
 
@@ -169,5 +213,115 @@ describe('Slot cell', () => {
 		await fireEvent.keyDown(document.body, { key: '+' })
 
 		expect(onZoom).not.toHaveBeenCalled()
+	})
+
+	it('warns about low resolution when the photo is too small for the slot', async () => {
+		slotSizedInPixels(100)
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 }, { cmPerPixel: 0.6 })
+
+		expect(
+			await screen.findByRole('img', { name: 'Baja resolución: 127 ppp' }),
+		).toBeInTheDocument()
+	})
+
+	it('zooms in a quarter per wheel notch turned away from the user', async () => {
+		const onZoom = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 }, { onZoom })
+		const image = screen.getByRole('img', { name: 'beach.jpg' })
+		await fireEvent.dblClick(image)
+
+		await fireEvent.wheel(image, { deltaY: -100 })
+
+		expect(onZoom).toHaveBeenCalledWith(1.25)
+	})
+
+	it('ignores the wheel while the slot is not being edited', async () => {
+		const onZoom = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 }, { onZoom })
+
+		await fireEvent.wheel(screen.getByRole('img', { name: 'beach.jpg' }), {
+			deltaY: -100,
+		})
+
+		expect(onZoom).not.toHaveBeenCalled()
+	})
+
+	it('moves the photo along with a drag while the slot is being edited', async () => {
+		slotSizedInPixels(100)
+		const onPosition = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 }, { onPosition })
+		const image = screen.getByRole('img', { name: 'beach.jpg' })
+		await fireEvent.dblClick(image)
+		await new Promise((resolve) => setTimeout(resolve))
+
+		await fireEvent.pointerDown(image, {
+			clientX: 50,
+			clientY: 50,
+			pointerId: 1,
+		})
+		await fireEvent.pointerMove(image, {
+			clientX: 60,
+			clientY: 50,
+			pointerId: 1,
+		})
+
+		expect(onPosition.mock.calls[0]?.[0].x).toBeCloseTo(0.2)
+	})
+
+	it('leaves the position alone when the slot is dragged without being edited', async () => {
+		slotSizedInPixels(100)
+		const onPosition = vi.fn()
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 }, { onPosition })
+		const image = screen.getByRole('img', { name: 'beach.jpg' })
+
+		await fireEvent.pointerDown(image, {
+			clientX: 50,
+			clientY: 50,
+			pointerId: 1,
+		})
+		await fireEvent.pointerMove(image, {
+			clientX: 60,
+			clientY: 50,
+			pointerId: 1,
+		})
+
+		expect(onPosition).not.toHaveBeenCalled()
+	})
+
+	it('leaves slot editing when its photo leaves the slot', async () => {
+		const slot = renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 })
+		await fireEvent.dblClick(screen.getByRole('img', { name: 'beach.jpg' }))
+
+		await slot.showPhoto(null)
+
+		expect(screen.queryByRole('button', { name: 'Acercar' })).toBeNull()
+	})
+
+	it('leaves slot editing when another photo takes the slot', async () => {
+		const slot = renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 })
+		await fireEvent.dblClick(screen.getByRole('img', { name: 'beach.jpg' }))
+
+		await slot.showPhoto({ ...photo, id: 2, name: 'mountain.jpg' })
+
+		expect(screen.queryByRole('button', { name: 'Acercar' })).toBeNull()
+	})
+
+	it('stops dragging the slot photo to another slot while the slot is being edited', async () => {
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 })
+		const draggable = () =>
+			document.querySelector('[aria-roledescription="draggable"]')
+		expect(draggable()).toHaveAttribute('aria-disabled', 'false')
+
+		await fireEvent.dblClick(screen.getByRole('img', { name: 'beach.jpg' }))
+
+		expect(draggable()).toHaveAttribute('aria-disabled', 'true')
+	})
+
+	it('does not warn about resolution while the page has no size yet', async () => {
+		slotSizedInPixels(100)
+		renderSlot({ position: { x: 0.5, y: 0.5 }, zoom: 1 }, { cmPerPixel: 0 })
+		await new Promise((resolve) => setTimeout(resolve))
+
+		expect(screen.queryByRole('img', { name: /Baja resolución/ })).toBeNull()
 	})
 })

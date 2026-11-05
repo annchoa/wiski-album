@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import {
-	BookOpen,
-	Check,
-	ChevronDown,
-	ChevronLeft,
-	ChevronRight,
-	RectangleHorizontal,
-	RectangleVertical,
-	Square,
-	Trash2,
-	Upload,
-} from '@lucide/vue'
+	PhBookOpen,
+	PhCaretDown,
+	PhCaretLeft,
+	PhCaretRight,
+	PhCheck,
+	PhRectangle,
+	PhSquare,
+	PhTrash,
+	PhUploadSimple,
+} from '@phosphor-icons/vue'
 import {
 	type DnDEndEvent,
 	DnDProvider,
 	snapCenterToCursor,
 } from '@vue-dnd-kit/core'
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside, useElementSize } from '@vueuse/core'
 import {
 	AlertDialogCancel,
 	AlertDialogContent,
@@ -69,6 +68,15 @@ watch(
 )
 const currentTemplateId = computed(
 	() => worksheet.pages[worksheet.currentPage]?.templateId,
+)
+
+const pageElement = useTemplateRef<HTMLElement>('pageElement')
+const { width: pageWidthPx } = useElementSize(pageElement, undefined, {
+	box: 'border-box',
+})
+// Zero while the page has no size yet: no slot can tell its resolution until then.
+const cmPerPixel = computed(() =>
+	pageWidthPx.value === 0 ? 0 : worksheet.product.widthCm / pageWidthPx.value,
 )
 
 const fileInput = useTemplateRef<HTMLInputElement>('fileInput')
@@ -146,9 +154,20 @@ async function showReturnedPhoto(photoId: number) {
 		?.scrollIntoView({ block: 'nearest' })
 }
 
-function slotAddress(slot: number) {
-	return { page: worksheet.currentPage, slot }
-}
+// The key includes the page and its template: a slot that changes either one starts
+// over, so a slot editing left open does not follow the new content.
+const currentPageSlots = computed(() => {
+	const page = worksheet.pages[worksheet.currentPage]
+	return (page?.slots ?? []).map((photo, slot) => {
+		const address = { page: worksheet.currentPage, slot }
+		return {
+			key: `${address.page}-${page?.templateId}-${slot}`,
+			photo,
+			address,
+			view: worksheet.slotView(address),
+		}
+	})
+})
 
 function handleDrop({ active, over }: DnDEndEvent) {
 	if (active.external) return addPhotos(active.external.files)
@@ -180,10 +199,10 @@ function handleDrop({ active, over }: DnDEndEvent) {
           >
             {{ $t(`products.${worksheet.product.id}.name`) }}
             <span class="flex items-center gap-1 text-xs font-medium text-neutral-500">
-              <BookOpen aria-hidden="true" class="size-3" />
+              <PhBookOpen aria-hidden="true" class="size-3" />
               {{ worksheet.product.pages }}
             </span>
-            <ChevronDown aria-hidden="true" class="ml-auto size-4" />
+            <PhCaretDown aria-hidden="true" class="ml-auto size-4" />
           </button>
           <ul
             v-if="isProductMenuOpen"
@@ -198,17 +217,14 @@ function handleDrop({ active, over }: DnDEndEvent) {
                 :class="{ 'bg-neutral-100': product.id === worksheet.product.id }"
                 @click="chooseProduct(product)"
               >
-                <component
-                  :is="product.widthCm === product.heightCm ? Square : RectangleVertical"
-                  aria-hidden="true"
-                  class="size-4 shrink-0"
-                />
+                <PhSquare v-if="product.widthCm === product.heightCm" aria-hidden="true" class="size-4 shrink-0" />
+                <PhRectangle v-else aria-hidden="true" class="size-4 shrink-0 rotate-90" />
                 {{ $t(`products.${product.id}.name`) }}
                 <span class="flex items-center gap-1 text-xs font-medium text-neutral-500">
-                  <BookOpen aria-hidden="true" class="size-3" />
+                  <PhBookOpen aria-hidden="true" class="size-3" />
                   {{ product.pages }}
                 </span>
-                <Check v-if="product.id === worksheet.product.id" aria-hidden="true" class="ml-auto size-4" />
+                <PhCheck v-if="product.id === worksheet.product.id" aria-hidden="true" class="ml-auto size-4" />
               </button>
             </li>
           </ul>
@@ -241,7 +257,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
             class="flex size-8 items-center justify-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
             @click="worksheet.previousPage()"
           >
-            <ChevronLeft aria-hidden="true" class="size-4" />
+            <PhCaretLeft aria-hidden="true" class="size-4" />
           </button>
           <span class="text-sm font-medium">{{ worksheet.currentPage + 1 }}/{{ worksheet.product.pages }}</span>
           <button
@@ -252,7 +268,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
             class="flex size-8 items-center justify-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
             @click="worksheet.nextPage()"
           >
-            <ChevronRight aria-hidden="true" class="size-4" />
+            <PhCaretRight aria-hidden="true" class="size-4" />
           </button>
         </nav>
       </header>
@@ -275,7 +291,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
               class="flex size-8 items-center justify-center rounded-lg border border-neutral-200 bg-white aria-pressed:border-neutral-900 aria-pressed:bg-neutral-900 aria-pressed:text-white"
               @click="worksheet.toggleSort('vertical')"
             >
-              <RectangleVertical aria-hidden="true" class="size-4" />
+              <PhRectangle aria-hidden="true" class="size-4 rotate-90" />
             </button>
             <button
               type="button"
@@ -285,7 +301,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
               class="flex size-8 items-center justify-center rounded-lg border border-neutral-200 bg-white aria-pressed:border-neutral-900 aria-pressed:bg-neutral-900 aria-pressed:text-white"
               @click="worksheet.toggleSort('horizontal')"
             >
-              <RectangleHorizontal aria-hidden="true" class="size-4" />
+              <PhRectangle aria-hidden="true" class="size-4" />
             </button>
           </div>
 
@@ -297,7 +313,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
                 class="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 text-sm text-neutral-500"
                 @click="fileInput?.click()"
               >
-                <Upload aria-hidden="true" class="size-6 text-neutral-400" />
+                <PhUploadSimple aria-hidden="true" class="size-6 text-neutral-400" />
                 {{ $t('editor.uploadHint') }}
               </button>
               <ul v-else :aria-label="$t('editor.photos')" class="flex gap-2">
@@ -315,7 +331,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
               class="absolute bottom-[91px] left-4 flex size-11 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12)] data-[over=true]:border-neutral-900 data-[over=true]:bg-neutral-900 data-[over=true]:text-white"
               @drop="handleDrop"
             >
-              <Trash2 aria-hidden="true" class="size-5" />
+              <PhTrash aria-hidden="true" class="size-5" />
               <span class="sr-only">{{ $t('editor.trash') }}</span>
             </DropArea>
           </div>
@@ -325,7 +341,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
               :title="$t('editor.upload')"
               class="flex h-10 cursor-pointer items-center justify-center rounded-lg border border-dashed border-neutral-400 bg-white has-focus-visible:ring-2 has-focus-visible:ring-neutral-900"
             >
-              <Upload aria-hidden="true" class="size-4" />
+              <PhUploadSimple aria-hidden="true" class="size-4" />
               <span class="sr-only">{{ $t('editor.upload') }}</span>
               <input ref="fileInput" type="file" accept="image/*" multiple class="sr-only" @change="uploadPhotos" />
             </label>
@@ -334,19 +350,21 @@ function handleDrop({ active, over }: DnDEndEvent) {
 
         <section :aria-label="$t('editor.worksheet')" class="flex min-w-0 flex-1 items-center justify-center bg-neutral-100">
           <div
+            ref="pageElement"
             class="h-[560px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
             :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
           >
             <ul class="grid h-full w-full" :class="slotsOnPage(currentTemplateId ?? '')">
               <SlotCell
-                v-for="(photo, slotIndex) in worksheet.pages[worksheet.currentPage]?.slots"
-                :key="slotIndex"
-                :photo="photo"
-                :address="slotAddress(slotIndex)"
-                :view="worksheet.slotView(slotAddress(slotIndex))"
-                @zoom="(zoom) => worksheet.setZoom(slotAddress(slotIndex), zoom)"
-                @reset="worksheet.resetSlotView(slotAddress(slotIndex))"
-                @position="(position) => worksheet.setPosition(slotAddress(slotIndex), position)"
+                v-for="slot in currentPageSlots"
+                :key="slot.key"
+                :photo="slot.photo"
+                :address="slot.address"
+                :view="slot.view"
+                :cm-per-pixel="cmPerPixel"
+                @zoom="(zoom) => worksheet.setZoom(slot.address, zoom)"
+                @reset="worksheet.resetSlotView(slot.address)"
+                @position="(position) => worksheet.setPosition(slot.address, position)"
                 @drop="handleDrop"
               />
             </ul>

@@ -1,4 +1,5 @@
 import { reactive } from 'vue'
+import type { Point } from './geometry'
 import type { Product } from './products'
 import { defaultTemplateId, templates } from './templates'
 
@@ -16,7 +17,7 @@ export interface Page {
 }
 
 export interface SlotView {
-	position: { x: number; y: number }
+	position: Point
 	zoom: number
 }
 
@@ -43,8 +44,8 @@ export type DropTarget =
 const minZoom = 1
 const maxZoom = 3
 
-function clamp01(value: number) {
-	return Math.max(0, Math.min(value, 1))
+function clamp(value: number, min: number, max: number) {
+	return Math.max(min, Math.min(value, max))
 }
 
 function centeredView(): SlotView {
@@ -71,6 +72,30 @@ export function createWorksheet(initialProduct: Product) {
 		views: {} as Record<number, SlotView>,
 	})
 
+	function photoAt(address: SlotAddress) {
+		return state.pages[address.page]?.slots[address.slot]
+	}
+
+	function placedPhotos() {
+		return state.pages.flatMap(({ slots }) =>
+			slots.filter((photo) => photo !== null),
+		)
+	}
+
+	function updateView(address: SlotAddress, change: Partial<SlotView>) {
+		const photo = photoAt(address)
+		if (!photo) return
+		state.views[photo.id] = {
+			...(state.views[photo.id] ?? centeredView()),
+			...change,
+		}
+	}
+
+	// A Photo that leaves its Slot starts centered and without zoom the next time it lands.
+	function discardViews(photos: Photo[]) {
+		for (const { id } of photos) delete state.views[id]
+	}
+
 	return Object.assign(state, {
 		upload(photo: Photo) {
 			state.assetPanel.push(photo)
@@ -88,34 +113,23 @@ export function createWorksheet(initialProduct: Product) {
 			state.sort = state.sort === orientation ? null : orientation
 		},
 		slotView(address: SlotAddress): SlotView {
-			const photo = state.pages[address.page]?.slots[address.slot]
+			const photo = photoAt(address)
 			return (photo && state.views[photo.id]) || centeredView()
 		},
 		setZoom(address: SlotAddress, zoom: number) {
-			const photo = state.pages[address.page]?.slots[address.slot]
-			if (!photo) return
-			state.views[photo.id] = {
-				...this.slotView(address),
-				zoom: Math.max(minZoom, Math.min(zoom, maxZoom)),
-			}
+			updateView(address, { zoom: clamp(zoom, minZoom, maxZoom) })
 		},
-		setPosition(address: SlotAddress, position: SlotView['position']) {
-			const photo = state.pages[address.page]?.slots[address.slot]
-			if (!photo) return
-			state.views[photo.id] = {
-				...this.slotView(address),
-				position: { x: clamp01(position.x), y: clamp01(position.y) },
-			}
+		setPosition(address: SlotAddress, { x, y }: Point) {
+			updateView(address, {
+				position: { x: clamp(x, 0, 1), y: clamp(y, 0, 1) },
+			})
 		},
 		resetSlotView(address: SlotAddress) {
-			const photo = state.pages[address.page]?.slots[address.slot]
-			if (photo) delete state.views[photo.id]
+			const photo = photoAt(address)
+			if (photo) discardViews([photo])
 		},
 		photos() {
-			const placed = state.pages.flatMap(({ slots }) =>
-				slots.filter((photo) => photo !== null),
-			)
-			return [...state.assetPanel, ...placed]
+			return [...state.assetPanel, ...placedPhotos()]
 		},
 		sortedAssetPanel() {
 			const first = state.sort
@@ -126,11 +140,9 @@ export function createWorksheet(initialProduct: Product) {
 			]
 		},
 		changeProduct(product: Product) {
-			const placed = state.pages.flatMap(({ slots }) =>
-				slots.filter((photo) => photo !== null),
-			)
+			const placed = placedPhotos()
 			state.assetPanel.push(...placed)
-			for (const photo of placed) delete state.views[photo.id]
+			discardViews(placed)
 			state.pages.splice(0, state.pages.length, ...emptyPages(product))
 			state.product = product
 			state.currentPage = 0
@@ -140,7 +152,7 @@ export function createWorksheet(initialProduct: Product) {
 			const template = templates.find(({ id }) => id === templateId)
 			if (!page || !template) return
 			const photos = page.slots.filter((photo) => photo !== null)
-			for (const photo of photos) delete state.views[photo.id]
+			discardViews(photos)
 			const kept = photos.slice(0, template.slotCount)
 			state.assetPanel.push(...photos.slice(template.slotCount))
 			page.templateId = templateId
@@ -163,7 +175,7 @@ export function createWorksheet(initialProduct: Product) {
 			if (!page || !photo) return
 			state.assetPanel.push(photo)
 			page.slots[address.slot] = null
-			delete state.views[photo.id]
+			discardViews([photo])
 		},
 		trash(photoId: number) {
 			const photoIndex = state.assetPanel.findIndex(({ id }) => id === photoId)
@@ -194,7 +206,7 @@ export function createWorksheet(initialProduct: Product) {
 			const replaced = page.slots[address.slot]
 			if (replaced) {
 				state.assetPanel.push(replaced)
-				delete state.views[replaced.id]
+				discardViews([replaced])
 			}
 			page.slots[address.slot] = photo
 		},

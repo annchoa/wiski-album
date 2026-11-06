@@ -16,6 +16,16 @@ vi.mock('../lib/readPhoto', () => ({
 	},
 }))
 
+function quickPreview() {
+	return within(screen.getByRole('group', { name: 'Páginas' }))
+}
+
+function currentPageButton() {
+	return quickPreview()
+		.getAllByRole('button')
+		.find((button) => button.getAttribute('aria-current') === 'page')
+}
+
 async function renderWorksheet(path: string) {
 	const router = createWikiRouter(createMemoryHistory())
 	await router.push(path)
@@ -30,17 +40,18 @@ describe('Worksheet screen', () => {
 		expect(
 			screen.getByRole('button', { name: /Wiski Momento/ }),
 		).toBeInTheDocument()
-		expect(screen.getByText('1/25')).toBeInTheDocument()
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 1\b/)
 	})
 
-	it('offers six templates with the first one selected', async () => {
+	it('offers five templates with the single one selected', async () => {
 		await renderWorksheet('/worksheet/wiski-moment')
 
 		const templates = within(
 			screen.getByRole('radiogroup', { name: 'Plantillas' }),
 		).getAllByRole('radio')
 
-		expect(templates).toHaveLength(6)
+		expect(templates).toHaveLength(5)
+		expect(templates[0]).toHaveAccessibleName('Individual')
 		expect(templates[0]).toBeChecked()
 	})
 
@@ -142,17 +153,57 @@ describe('Worksheet screen', () => {
 
 	it('moves between pages with the arrows and disables them at the ends', async () => {
 		await renderWorksheet('/worksheet/wiski-route')
-		const previous = screen.getByRole('button', { name: 'Página anterior' })
-		const next = screen.getByRole('button', { name: 'Página siguiente' })
+		const previous = quickPreview().getByRole('button', {
+			name: 'Página anterior',
+		})
+		const next = quickPreview().getByRole('button', {
+			name: 'Página siguiente',
+		})
 		expect(previous).toBeDisabled()
 
 		await fireEvent.click(next)
-		expect(screen.getByText('2/20')).toBeInTheDocument()
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 2\b/)
 		expect(previous).toBeEnabled()
 
 		for (let step = 0; step < 18; step++) await fireEvent.click(next)
-		expect(screen.getByText('20/20')).toBeInTheDocument()
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 20\b/)
 		expect(next).toBeDisabled()
+	})
+
+	it('picks the page to edit from its thumbnail in the quick preview', async () => {
+		await renderWorksheet('/worksheet/wiski-route')
+		expect(
+			quickPreview().getAllByRole('button', { name: /^Página \d+\b/ }),
+		).toHaveLength(20)
+
+		await fireEvent.click(
+			quickPreview().getByRole('button', { name: /^Página 7\b/ }),
+		)
+
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 7\b/)
+	})
+
+	it('shows the margins mode of the current page and changes only that page', async () => {
+		await renderWorksheet('/worksheet/wiski-moment')
+		const margins = within(screen.getByRole('radiogroup', { name: 'Márgenes' }))
+		expect(
+			margins.getByRole('radio', { name: 'A sangre completa' }),
+		).toBeChecked()
+
+		await fireEvent.click(margins.getByRole('radio', { name: 'Con margen' }))
+		expect(margins.getByRole('radio', { name: 'Con margen' })).toBeChecked()
+
+		await fireEvent.click(
+			screen.getByRole('button', { name: 'Página siguiente' }),
+		)
+		expect(
+			margins.getByRole('radio', { name: 'A sangre completa' }),
+		).toBeChecked()
+
+		await fireEvent.click(
+			screen.getByRole('button', { name: 'Página anterior' }),
+		)
+		expect(margins.getByRole('radio', { name: 'Con margen' })).toBeChecked()
 	})
 
 	it('shows as many slots on the worksheet as the chosen template has', async () => {
@@ -190,7 +241,7 @@ describe('Worksheet screen', () => {
 		expect(
 			await screen.findByRole('button', { name: /Wiski Ruta/ }),
 		).toBeInTheDocument()
-		expect(screen.getByText('1/20')).toBeInTheDocument()
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 1\b/)
 		await vi.waitFor(() =>
 			expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument(),
 		)
@@ -211,7 +262,7 @@ describe('Worksheet screen', () => {
 		await vi.waitFor(() =>
 			expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument(),
 		)
-		expect(screen.getByText('1/25')).toBeInTheDocument()
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 1\b/)
 	})
 
 	it('does nothing when the chosen product is already the current one', async () => {
@@ -250,7 +301,7 @@ describe('Worksheet screen', () => {
 		expect(
 			await screen.findByRole('button', { name: /Wiski Ruta/ }),
 		).toBeInTheDocument()
-		expect(screen.getByText('1/20')).toBeInTheDocument()
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 1\b/)
 	})
 
 	it('keeps the current product when the switch is cancelled', async () => {
@@ -267,7 +318,7 @@ describe('Worksheet screen', () => {
 		expect(
 			await screen.findByRole('button', { name: /Wiski Momento/ }),
 		).toBeInTheDocument()
-		expect(screen.getByText('1/25')).toBeInTheDocument()
+		expect(currentPageButton()).toHaveAccessibleName(/^Página 1\b/)
 		await vi.waitFor(() =>
 			expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument(),
 		)

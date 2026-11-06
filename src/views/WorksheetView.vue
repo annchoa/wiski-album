@@ -2,8 +2,6 @@
 import {
 	PhBookOpen,
 	PhCaretDown,
-	PhCaretLeft,
-	PhCaretRight,
 	PhCheck,
 	PhRectangle,
 	PhSquare,
@@ -37,6 +35,7 @@ import { useRouter } from 'vue-router'
 import AssetPanelPhoto from '@/components/worksheet/AssetPanelPhoto.vue'
 import DropArea from '@/components/worksheet/DropArea.vue'
 import PanelOverlay from '@/components/worksheet/PanelOverlay.vue'
+import QuickPreview from '@/components/worksheet/QuickPreview.vue'
 import SlotCell from '@/components/worksheet/SlotCell.vue'
 import TrashOverlay from '@/components/worksheet/TrashOverlay.vue'
 import {
@@ -51,6 +50,7 @@ import {
 	createWorksheet,
 	type DragSource,
 	type DropTarget,
+	type Margins,
 } from '@/lib/worksheet'
 
 const props = defineProps<{ productId: string }>()
@@ -69,6 +69,10 @@ watch(
 const currentTemplateId = computed(
 	() => worksheet.pages[worksheet.currentPage]?.templateId,
 )
+const currentMargins = computed(
+	() => worksheet.pages[worksheet.currentPage]?.margins ?? 'full-bleed',
+)
+const marginsModes: Margins[] = ['framed', 'full-bleed']
 
 const pageElement = useTemplateRef<HTMLElement>('pageElement')
 const { width: pageWidthPx } = useElementSize(pageElement, undefined, {
@@ -188,7 +192,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
 <template>
   <DnDProvider :modifiers="[snapCenterToCursor]">
     <div class="flex h-screen flex-col overflow-hidden bg-white text-neutral-950">
-      <header class="flex h-16 shrink-0 items-center gap-6 border-b border-neutral-200 px-6">
+      <header class="flex h-[88px] shrink-0 items-center gap-6 border-b border-neutral-200 px-6">
         <div ref="productSelectorElement" class="relative w-[200px] shrink-0" @keydown.esc="isProductMenuOpen = false">
           <button
             type="button"
@@ -230,47 +234,17 @@ function handleDrop({ active, over }: DnDEndEvent) {
           </ul>
         </div>
 
-        <div role="radiogroup" :aria-label="$t('editor.templates.label')" class="flex flex-1 items-center justify-center gap-2">
-          <button
-            v-for="template in templates"
-            :key="template.id"
-            type="button"
-            role="radio"
-            :aria-checked="template.id === currentTemplateId"
-            :aria-label="$t(`editor.templates.${template.id}`)"
-            :title="$t(`editor.templates.${template.id}`)"
-            class="h-[50px] w-9 overflow-hidden rounded-md border border-neutral-200 bg-white aria-checked:border-2 aria-checked:border-neutral-900"
-            @click="worksheet.changeTemplate(worksheet.currentPage, template.id)"
-          >
-            <span class="grid h-full w-full" :class="slotsInThumbnail(template.id)">
-              <span v-for="slot in template.slotCount" :key="slot" class="rounded-[1px] bg-neutral-300" />
-            </span>
-          </button>
-        </div>
-
-        <nav class="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            :aria-label="$t('editor.previousPage')"
-            :title="$t('editor.previousPage')"
-            :disabled="worksheet.currentPage === 0"
-            class="flex size-8 items-center justify-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
-            @click="worksheet.previousPage()"
-          >
-            <PhCaretLeft aria-hidden="true" class="size-4" />
-          </button>
-          <span class="text-sm font-medium">{{ worksheet.currentPage + 1 }}/{{ worksheet.product.pages }}</span>
-          <button
-            type="button"
-            :aria-label="$t('editor.nextPage')"
-            :title="$t('editor.nextPage')"
-            :disabled="worksheet.currentPage === worksheet.product.pages - 1"
-            class="flex size-8 items-center justify-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
-            @click="worksheet.nextPage()"
-          >
-            <PhCaretRight aria-hidden="true" class="size-4" />
-          </button>
-        </nav>
+        <div aria-hidden="true" class="w-[200px] shrink-0" />
+        <QuickPreview
+          class="max-w-[816px] flex-1"
+          :pages="worksheet.pages"
+          :current="worksheet.currentPage"
+          :aspect-ratio="`${worksheet.product.widthCm} / ${worksheet.product.heightCm}`"
+          :position-and-zoom="worksheet.positionAndZoom"
+          @select="(page) => (worksheet.currentPage = page)"
+          @previous="worksheet.previousPage()"
+          @next="worksheet.nextPage()"
+        />
       </header>
 
       <div class="flex min-h-0 flex-1">
@@ -348,13 +322,14 @@ function handleDrop({ active, over }: DnDEndEvent) {
           </div>
         </DropArea>
 
-        <section :aria-label="$t('editor.worksheet')" class="flex min-w-0 flex-1 items-center justify-center bg-neutral-100">
+        <div class="flex min-w-0 flex-1 flex-col">
+        <section :aria-label="$t('editor.worksheet')" class="flex min-h-0 flex-1 items-center justify-center bg-neutral-100">
           <div
             ref="pageElement"
-            class="h-[560px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
+            class="h-[540px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
             :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
           >
-            <ul class="grid h-full w-full" :class="slotsOnPage(currentTemplateId ?? '')">
+            <ul class="grid h-full w-full" :class="slotsOnPage(currentTemplateId ?? '', currentMargins)">
               <SlotCell
                 v-for="slot in currentPageSlots"
                 :key="slot.key"
@@ -370,6 +345,48 @@ function handleDrop({ active, over }: DnDEndEvent) {
             </ul>
           </div>
         </section>
+
+        <div class="flex h-[72px] shrink-0 items-center justify-center gap-6 border-t border-neutral-200 px-4">
+          <div aria-hidden="true" class="w-[200px] shrink-0" />
+            <div role="radiogroup" :aria-label="$t('editor.templates.label')" class="flex items-center justify-center gap-2">
+              <button
+                v-for="template in templates"
+                :key="template.id"
+                type="button"
+                role="radio"
+                :aria-checked="template.id === currentTemplateId"
+                :aria-label="$t(`editor.templates.${template.id}`)"
+                :title="$t(`editor.templates.${template.id}`)"
+                class="h-11 overflow-hidden rounded-md border border-neutral-200 bg-white aria-checked:border-2 aria-checked:border-neutral-900"
+            :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
+                @click="worksheet.changeTemplate(worksheet.currentPage, template.id)"
+              >
+                <span class="grid h-full w-full" :class="slotsInThumbnail(template.id, currentMargins)">
+                  <span
+                    v-for="slot in template.slotCount"
+                    :key="slot"
+                    class="rounded-[1px] bg-neutral-300"
+                    :class="{ 'even:bg-neutral-400/50': currentMargins === 'full-bleed' }"
+                  />
+                </span>
+              </button>
+            </div>
+          <div role="radiogroup" :aria-label="$t('editor.margins.label')" class="flex rounded-lg border border-neutral-200 bg-neutral-100 p-0.5">
+            <button
+              v-for="margins in marginsModes"
+              :key="margins"
+              type="button"
+              role="radio"
+              :aria-checked="margins === currentMargins"
+              class="h-[30px] rounded-md px-3 text-[13px] font-medium text-neutral-500 aria-checked:border aria-checked:border-neutral-200 aria-checked:bg-white aria-checked:font-semibold aria-checked:text-neutral-950"
+              @click="worksheet.changeMargins(worksheet.currentPage, margins)"
+            >
+              {{ $t(`editor.margins.${margins}`) }}
+            </button>
+          </div>
+          <div aria-hidden="true" class="w-[200px] shrink-0" />
+        </div>
+        </div>
       </div>
     </div>
 

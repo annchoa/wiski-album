@@ -11,9 +11,16 @@ export interface Photo {
 	height: number
 }
 
+export type Margins = 'framed' | 'full-bleed'
+
 export interface Page {
 	templateId: string
+	margins: Margins
 	slots: (Photo | null)[]
+}
+
+export function isEmpty(page: Page) {
+	return page.slots.every((photo) => photo === null)
 }
 
 export interface PositionAndZoom {
@@ -55,7 +62,11 @@ function centeredPositionAndZoom(): PositionAndZoom {
 function emptyPage(): Page {
 	const template = templates.find(({ id }) => id === defaultTemplateId)
 	const slotCount = template?.slotCount ?? 1
-	return { templateId: defaultTemplateId, slots: Array(slotCount).fill(null) }
+	return {
+		templateId: defaultTemplateId,
+		margins: 'full-bleed',
+		slots: Array(slotCount).fill(null),
+	}
 }
 
 function emptyPages(product: Product): Page[] {
@@ -166,6 +177,10 @@ export function createWorksheet(initialProduct: Product) {
 				{ length: template.slotCount },
 				(_, index) => kept[index] ?? null,
 			)
+		},
+		changeMargins(pageIndex: number, margins: Margins) {
+			const page = state.pages[pageIndex]
+			if (page) page.margins = margins
 		},
 		move(from: SlotAddress, to: SlotAddress) {
 			const fromPage = state.pages[from.page]

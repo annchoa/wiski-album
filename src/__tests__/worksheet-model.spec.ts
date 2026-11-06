@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { products } from '../lib/products'
-import { createWorksheet, type Photo } from '../lib/worksheet'
+import { createWorksheet, isEmpty, type Photo } from '../lib/worksheet'
 
 function momentProduct() {
 	const product = products.find(({ id }) => id === 'moment')
@@ -22,6 +22,12 @@ function aPhoto(id: number): Photo {
 		width: 4000,
 		height: 3000,
 	}
+}
+
+function pageOf(worksheet: ReturnType<typeof createWorksheet>, index: number) {
+	const page = worksheet.pages[index]
+	if (!page) throw new Error(`page ${index} is missing`)
+	return page
 }
 
 describe('Worksheet model', () => {
@@ -259,7 +265,7 @@ describe('Worksheet model', () => {
 		worksheet.place(first.id, { page: 0, slot: 0 })
 		worksheet.place(second.id, { page: 0, slot: 1 })
 
-		worksheet.changeTemplate(0, 'full-bleed')
+		worksheet.changeTemplate(0, 'single')
 
 		expect(worksheet.pages[0]?.slots).toEqual([first])
 		expect(worksheet.assetPanel).toEqual([second])
@@ -278,6 +284,60 @@ describe('Worksheet model', () => {
 		worksheet.changeTemplate(0, 'grid-of-four')
 
 		expect(worksheet.pages[0]?.slots).toEqual([first, second, null, null])
+	})
+
+	it('starts every page with the single template', () => {
+		const worksheet = createWorksheet(momentProduct())
+
+		expect(worksheet.pages.map(({ templateId }) => templateId)).toEqual(
+			Array(momentProduct().pages).fill('single'),
+		)
+		expect(worksheet.pages[0]?.slots).toEqual([null])
+	})
+
+	it('tells a page with at least one photo from an empty one', () => {
+		const worksheet = createWorksheet(momentProduct())
+		const photo = aPhoto(1)
+		worksheet.changeTemplate(0, 'stacked')
+		worksheet.upload(photo)
+		expect(isEmpty(pageOf(worksheet, 0))).toBe(true)
+
+		worksheet.place(photo.id, { page: 0, slot: 1 })
+		expect(isEmpty(pageOf(worksheet, 0))).toBe(false)
+		expect(isEmpty(pageOf(worksheet, 1))).toBe(true)
+
+		worksheet.drop(
+			{ kind: 'slot', address: { page: 0, slot: 1 } },
+			{ kind: 'asset-panel' },
+		)
+		expect(isEmpty(pageOf(worksheet, 0))).toBe(true)
+	})
+
+	it('starts every page in full bleed', () => {
+		const worksheet = createWorksheet(momentProduct())
+
+		expect(worksheet.pages.map(({ margins }) => margins)).toEqual(
+			Array(momentProduct().pages).fill('full-bleed'),
+		)
+	})
+
+	it('changes the margins of one page only, keeping its photos, positions and zooms', () => {
+		const worksheet = createWorksheet(momentProduct())
+		const photo = aPhoto(1)
+		worksheet.upload(photo)
+		worksheet.place(photo.id, { page: 0, slot: 0 })
+		worksheet.setZoom({ page: 0, slot: 0 }, 2)
+		worksheet.setPosition({ page: 0, slot: 0 }, { x: 0.1, y: 0.9 })
+
+		worksheet.changeMargins(0, 'framed')
+
+		expect(worksheet.pages[0]?.margins).toBe('framed')
+		expect(worksheet.pages[1]?.margins).toBe('full-bleed')
+		expect(worksheet.pages[0]?.slots).toEqual([photo])
+		expect(worksheet.positionAndZoom({ page: 0, slot: 0 })).toEqual({
+			position: { x: 0.1, y: 0.9 },
+			zoom: 2,
+		})
 	})
 
 	it('resets the pages and keeps every uploaded photo when the product changes', () => {

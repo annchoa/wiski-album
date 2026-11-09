@@ -10,7 +10,7 @@ describe('facingPages', () => {
 		expect(facingPages(1)).toEqual([{ left: null, right: 0 }])
 	})
 
-	it('pairs the pages after the first one: 2 and 3, 4 and 5', () => {
+	it('groups the pages after the first one as facing pages: 2 and 3, 4 and 5', () => {
 		expect(facingPages(5)).toEqual([
 			{ left: null, right: 0 },
 			{ left: 1, right: 2 },

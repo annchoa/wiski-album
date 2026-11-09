@@ -45,7 +45,7 @@ describe('buildQuickPreview', () => {
 		}
 	})
 
-	it('draws one image for each filled slot', async () => {
+	it('draws one photo for each filled slot', async () => {
 		const sideBySide = {
 			templateId: 'side-by-side',
 			margins: 'full-bleed' as const,
@@ -59,7 +59,7 @@ describe('buildQuickPreview', () => {
 
 	// The top slot is 20 x 14 cm. PDF coordinates start at the bottom, so its
 	// lower edge is 14 cm above the bottom of the page.
-	it('puts the image of a top slot at the top of the page', async () => {
+	it('puts the photo of a top slot at the top of the page', async () => {
 		const stacked = {
 			templateId: 'stacked',
 			margins: 'full-bleed' as const,

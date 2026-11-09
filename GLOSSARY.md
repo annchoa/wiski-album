@@ -65,15 +65,15 @@ _Avoid_: Template carousel, template gallery
 The row of Page thumbnails in the top bar, with arrows on both sides, from which the user picks the Page to edit. Each thumbnail shows the Page with its Photos and its number; the current Page has a marked border.
 
 **Quick preview**:
-A PDF of the photobook for viewing only. Its Photos have reduced quality, so it is not for printing. Every Page that has a Photo carries a Watermark, and every Page carries a notice that this is a Quick preview.
+A PDF of the photobook for viewing only. Its Photos have reduced quality, so it is not for printing. It carries a Watermark and a notice that it is not for printing.
 _Avoid_: Draft, proof
 
 **PDF preview**:
 The dialog the eye button opens. It shows the Quick preview as Facing pages and lets the user download it.
 
 **Facing pages**:
-Two Pages shown side by side, as in a magazine. The first Page is shown alone, then the pairs follow: Pages 2 and 3, Pages 4 and 5, and so on. If the last Page is even, it is shown alone.
+Two Pages shown side by side, as in a magazine. The first Page is shown alone, then Pages 2 and 3, Pages 4 and 5, and so on. If the last Page is even, it is shown alone.
 _Avoid_: Spread, double page, page pair
 
 **Watermark**:
-The mark "WISKI" with "photobook" below it, drawn once, in the middle of each Page of the Quick preview that has a Photo. The user cannot remove it.
+The mark "WISKI" with "photobook" below it, that the Quick preview carries over its Photos. The user cannot remove it.

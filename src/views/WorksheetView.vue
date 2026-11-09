@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
-	PhBook,
 	PhBookOpen,
 	PhCaretDown,
+	PhBook,
 	PhCheck,
 	PhCreditCard,
 	PhEye,
@@ -80,12 +80,7 @@ const marginsModes: Margins[] = ['framed', 'full-bleed']
 
 // Full bleed has no gap, so each slot of a thumbnail needs its own tone.
 // Written out in full because Tailwind scans this file.
-const fullBleedThumbnailTones = [
-	'bg-neutral-300',
-	'bg-neutral-600',
-	'bg-neutral-800',
-	'bg-neutral-400',
-]
+const fullBleedThumbnailTones = ['bg-neutral-300', 'bg-neutral-600', 'bg-neutral-800', 'bg-neutral-400']
 
 const pageElement = useTemplateRef<HTMLElement>('pageElement')
 const { width: pageWidthPx } = useElementSize(pageElement, undefined, {

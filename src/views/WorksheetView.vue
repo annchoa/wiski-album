@@ -74,6 +74,10 @@ const currentMargins = computed(
 )
 const marginsModes: Margins[] = ['framed', 'full-bleed']
 
+// Full bleed has no gap, so each slot of a thumbnail needs its own tone.
+// Written out in full because Tailwind scans this file.
+const fullBleedThumbnailTones = ['bg-neutral-300', 'bg-neutral-600', 'bg-neutral-800', 'bg-neutral-400']
+
 const pageElement = useTemplateRef<HTMLElement>('pageElement')
 const { width: pageWidthPx } = useElementSize(pageElement, undefined, {
 	box: 'border-box',
@@ -365,8 +369,8 @@ function handleDrop({ active, over }: DnDEndEvent) {
                   <span
                     v-for="slot in template.slotCount"
                     :key="slot"
-                    class="rounded-[1px] bg-neutral-300"
-                    :class="{ 'even:bg-neutral-400/50': currentMargins === 'full-bleed' }"
+                    class="rounded-[1px]"
+                    :class="currentMargins === 'full-bleed' ? fullBleedThumbnailTones[slot - 1] : 'bg-neutral-300'"
                   />
                 </span>
               </button>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
+	PhBook,
 	PhBookOpen,
 	PhCaretDown,
-	PhBook,
 	PhCheck,
 	PhCreditCard,
 	PhEye,
@@ -38,8 +38,9 @@ import { useRouter } from 'vue-router'
 import AssetPanelPhoto from '@/components/worksheet/AssetPanelPhoto.vue'
 import DropArea from '@/components/worksheet/DropArea.vue'
 import PanelOverlay from '@/components/worksheet/PanelOverlay.vue'
-import ThumbnailPanel from '@/components/worksheet/ThumbnailPanel.vue'
+import PdfPreviewDialog from '@/components/worksheet/PdfPreviewDialog.vue'
 import SlotCell from '@/components/worksheet/SlotCell.vue'
+import ThumbnailPanel from '@/components/worksheet/ThumbnailPanel.vue'
 import TrashOverlay from '@/components/worksheet/TrashOverlay.vue'
 import {
 	slotsInThumbnail,
@@ -79,7 +80,12 @@ const marginsModes: Margins[] = ['framed', 'full-bleed']
 
 // Full bleed has no gap, so each slot of a thumbnail needs its own tone.
 // Written out in full because Tailwind scans this file.
-const fullBleedThumbnailTones = ['bg-neutral-300', 'bg-neutral-600', 'bg-neutral-800', 'bg-neutral-400']
+const fullBleedThumbnailTones = [
+	'bg-neutral-300',
+	'bg-neutral-600',
+	'bg-neutral-800',
+	'bg-neutral-400',
+]
 
 const pageElement = useTemplateRef<HTMLElement>('pageElement')
 const { width: pageWidthPx } = useElementSize(pageElement, undefined, {
@@ -95,6 +101,8 @@ const photoColumnCount = 3
 const photoColumns = computed(() =>
 	distributeInColumns(worksheet.sortedAssetPanel(), photoColumnCount),
 )
+
+const isPdfPreviewOpen = ref(false)
 
 const isProductMenuOpen = ref(false)
 const productSelector = useTemplateRef<HTMLElement>('productSelectorElement')
@@ -374,6 +382,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
               type="button"
               :aria-label="$t('editor.previewPdf')"
               :title="$t('editor.previewPdf')"
+              @click="isPdfPreviewOpen = true"
               class="flex size-14 items-center justify-center rounded-full border border-border bg-background text-primary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <PhEye aria-hidden="true" class="size-8" />
@@ -424,6 +433,13 @@ function handleDrop({ active, over }: DnDEndEvent) {
         </div>
       </div>
     </div>
+
+    <PdfPreviewDialog
+      v-model:open="isPdfPreviewOpen"
+      :product="worksheet.product"
+      :pages="worksheet.pages"
+      :position-and-zoom="(address) => worksheet.positionAndZoom(address)"
+    />
 
     <AlertDialogRoot :open="pendingProduct !== null" @update:open="cancelProductChange">
       <AlertDialogPortal>

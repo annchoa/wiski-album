@@ -18,6 +18,21 @@ const messages = {
 			pay: 'Pagar',
 			editCover: 'Editar portada',
 			previewPdf: 'Vista previa del PDF',
+			quickPreview: {
+				notice:
+					'Vista previa en baja resolución. Tu álbum se imprimirá en máxima calidad.',
+			},
+			pdfPreview: {
+				title: 'Previsualización rápida',
+				building: 'Preparando la previsualización…',
+				error: 'No se pudo preparar la previsualización',
+				page: 'Página {number}',
+				position: '{pages} / {total}',
+				previous: 'Páginas anteriores',
+				next: 'Páginas siguientes',
+				download: 'Descargar PDF',
+				close: 'Cerrar',
+			},
 			thumbnailPanel: {
 				label: 'Páginas',
 				page: 'Página {number}',
@@ -90,6 +105,21 @@ const messages = {
 			pay: 'Pay',
 			editCover: 'Edit cover',
 			previewPdf: 'Preview PDF',
+			quickPreview: {
+				notice:
+					'Low-resolution preview. Your album will be printed in full quality.',
+			},
+			pdfPreview: {
+				title: 'Quick preview',
+				building: 'Preparing the preview…',
+				error: 'The preview could not be prepared',
+				page: 'Page {number}',
+				position: '{pages} / {total}',
+				previous: 'Previous pages',
+				next: 'Next pages',
+				download: 'Download PDF',
+				close: 'Close',
+			},
 			thumbnailPanel: {
 				label: 'Pages',
 				page: 'Page {number}',

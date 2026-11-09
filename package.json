@@ -20,6 +20,8 @@
 		"@vueuse/core": "^15.0.0",
 		"class-variance-authority": "^0.7.1",
 		"cn": "^0.5.2",
+		"pdf-lib": "^1.17.1",
+		"pdfjs-dist": "^6.5.438",
 		"reka-ui": "^2.11.0",
 		"vue": "^3.5.42",
 		"vue-i18n": "^11.4.18",

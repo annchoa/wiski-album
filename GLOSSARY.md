@@ -65,7 +65,7 @@ _Avoid_: Template carousel, template gallery
 The row of Page thumbnails in the top bar, with arrows on both sides, from which the user picks the Page to edit. Each thumbnail shows the Page with its Photos and its number; the current Page has a marked border.
 
 **Quick preview**:
-A PDF of the photobook for viewing only. Its Photos have reduced quality, so it is not for printing. Every Photo carries a Watermark, and every Page carries a notice that this is a Quick preview.
+A PDF of the photobook for viewing only. Its Photos have reduced quality, so it is not for printing. Every Page that has a Photo carries a Watermark, and every Page carries a notice that this is a Quick preview.
 _Avoid_: Draft, proof
 
 **PDF preview**:
@@ -76,4 +76,4 @@ Two Pages shown side by side, as in a magazine. The first Page is shown alone, t
 _Avoid_: Spread, double page, page pair
 
 **Watermark**:
-The mark "WISKI" with "photobook" below it, drawn on each Photo of the Quick preview. The user cannot remove it.
+The mark "WISKI" with "photobook" below it, drawn once, in the middle of each Page of the Quick preview that has a Photo. The user cannot remove it.

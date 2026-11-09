@@ -2,7 +2,10 @@
 import {
 	PhBookOpen,
 	PhCaretDown,
+	PhBook,
 	PhCheck,
+	PhCreditCard,
+	PhEye,
 	PhRectangle,
 	PhSquare,
 	PhTrash,
@@ -327,7 +330,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
         </DropArea>
 
         <div class="flex min-w-0 flex-1 flex-col">
-        <section :aria-label="$t('editor.worksheet')" class="flex min-h-0 flex-1 items-center justify-center bg-neutral-100">
+        <section :aria-label="$t('editor.worksheet')" class="relative flex min-h-0 flex-1 items-center justify-center bg-neutral-100">
           <div
             ref="pageElement"
             class="h-[540px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
@@ -347,6 +350,34 @@ function handleDrop({ active, over }: DnDEndEvent) {
                 @drop="handleDrop"
               />
             </ul>
+          </div>
+
+          <!-- PROTOTYPE: order buttons without behavior, to feel the interaction. Delete or replace. -->
+          <div class="absolute right-8 bottom-5 flex flex-col items-center gap-2.5">
+            <button
+              type="button"
+              :aria-label="$t('editor.pay')"
+              :title="$t('editor.pay')"
+              class="flex size-20 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              <PhCreditCard aria-hidden="true" class="size-10" />
+            </button>
+            <button
+              type="button"
+              :aria-label="$t('editor.editCover')"
+              :title="$t('editor.editCover')"
+              class="flex size-14 items-center justify-center rounded-full border border-border bg-background text-primary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              <PhBook aria-hidden="true" class="size-7" />
+            </button>
+            <button
+              type="button"
+              :aria-label="$t('editor.previewPdf')"
+              :title="$t('editor.previewPdf')"
+              class="flex size-14 items-center justify-center rounded-full border border-border bg-background text-primary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              <PhEye aria-hidden="true" class="size-8" />
+            </button>
           </div>
         </section>
 

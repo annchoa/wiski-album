@@ -15,6 +15,9 @@ const messages = {
 			uploadHint: 'Sube aquí tus fotos',
 			upload: 'Subir fotos',
 			trash: 'Papelera',
+			pay: 'Pagar',
+			editCover: 'Editar portada',
+			previewPdf: 'Vista previa del PDF',
 			quickPreview: {
 				label: 'Páginas',
 				page: 'Página {number}',
@@ -84,6 +87,9 @@ const messages = {
 			uploadHint: 'Upload your photos here',
 			upload: 'Upload photos',
 			trash: 'Trash',
+			pay: 'Pay',
+			editCover: 'Edit cover',
+			previewPdf: 'Preview PDF',
 			quickPreview: {
 				label: 'Pages',
 				page: 'Page {number}',

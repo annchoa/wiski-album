@@ -447,10 +447,10 @@ function handleDrop({ active, over }: DnDEndEvent) {
             {{ $t('editor.changeProduct.message') }}
           </AlertDialogDescription>
           <div class="mt-6 flex justify-end gap-2">
-            <AlertDialogCancel class="h-10 rounded-lg border border-neutral-200 bg-white px-4 text-sm font-medium">
+            <AlertDialogCancel class="h-10 rounded-lg bg-neutral-900 px-4 text-sm font-medium text-neutral-50">
               {{ $t('editor.changeProduct.cancel') }}
             </AlertDialogCancel>
-            <button type="button" class="h-10 rounded-lg bg-neutral-900 px-4 text-sm font-medium text-neutral-50" @click="confirmProductChange">
+            <button type="button" class="h-10 rounded-lg border border-neutral-200 bg-white px-4 text-sm font-medium" @click="confirmProductChange">
               {{ $t('editor.changeProduct.confirm') }}
             </button>
           </div>

@@ -66,11 +66,11 @@ const messages = {
 				'grid-of-four': 'Cuadrícula de cuatro',
 			},
 			changeProduct: {
-				title: 'Cambiar de producto',
+				title: '¿Cambiar de producto?',
 				message:
-					'Cambiar de producto reiniciará tus páginas. Tus fotos se conservan.',
+					'Tus fotos están a salvo, pero tendrás que volver a diseñar las páginas.',
 				cancel: 'Cancelar',
-				confirm: 'Cambiar',
+				confirm: 'Cambiar de producto',
 			},
 		},
 		specs: {
@@ -150,11 +150,11 @@ const messages = {
 				'grid-of-four': 'Grid of four',
 			},
 			changeProduct: {
-				title: 'Change product',
+				title: 'Change product?',
 				message:
-					'Changing product will reset your pages. Your photos are kept.',
+					'Your photos are safe, but you will need to redesign your pages.',
 				cancel: 'Cancel',
-				confirm: 'Change',
+				confirm: 'Change product',
 			},
 		},
 		specs: {

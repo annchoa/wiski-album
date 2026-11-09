@@ -31,6 +31,8 @@ Screenshots cannot show drags, hover states or the file picker. [scripts/](scrip
 
 After `bun add` or `bun remove`, Vite re-optimizes on the first page load and reloads it mid-script: open the page once and wait before running a script, or its first query returns `undefined`. A failed script leaves its Chrome running on port 9333: close it with `pkill -f "[w]iski-cdp-profile"` (the brackets stop `pkill` from matching its own shell).
 
+Tests cannot judge how a PDF looks. Build a sample from a throwaway `.ts` file with `docker compose run --rm dev bun run <file>`, render it on the host with `pdftoppm -png -r 45 <file>.pdf <name>` and read the PNG. Delete the throwaway file afterwards.
+
 ## Drag and drop gotchas (`@vue-dnd-kit/core`)
 
 - The draggable element gets `role` and `tabindex`, which overrides a `<li>`'s `listitem` role: make an inner `div` the draggable.
@@ -43,6 +45,11 @@ After `bun add` or `bun remove`, Vite re-optimizes on the first page load and re
 - `reka-ui` dialogs unmount a moment after closing, and the rest of the page stays `aria-hidden` until then: assert with `findBy*` or `vi.waitFor`.
 - Real drags cannot be simulated in happy-dom: check them in Chrome (see Visual check).
 - happy-dom has no layout: `useElementSize` reads `NaN` or `0` and its `ResizeObserver` never reports a size. Stub `ResizeObserver` so it reports one on `observe`, as `slotSizedInPixels` does in `SlotCell.spec.ts`, and pass `box: 'border-box'` to `useElementSize` (the default content-box path turns empty padding strings into `NaN`).
+- The `dev` container runs Node 20 and `pdfjs-dist` needs Node ≥ 22.13: read a PDF in tests with `pdf-lib` (`src/__tests__/pdfContent.ts`). Keep `pdfjs-dist` behind `src/lib/renderPdf.ts` and mock that module in component tests.
+
+## Formatting
+
+Run `bunx biome check --write <files>` on the files you changed. On `src` it reorders imports and reflows lines in files you did not touch, and the diff fills with noise.
 
 ## Docker only
 

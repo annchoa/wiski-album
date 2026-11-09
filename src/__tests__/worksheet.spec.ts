@@ -227,15 +227,15 @@ describe('Worksheet screen', () => {
 		await fireEvent.click(screen.getByRole('menuitem', { name: /Wiski Ruta/ }))
 
 		const dialog = screen.getByRole('alertdialog', {
-			name: 'Cambiar de producto',
+			name: '¿Cambiar de producto?',
 		})
 		expect(
 			within(dialog).getByText(
-				'Cambiar de producto reiniciará tus páginas. Tus fotos se conservan.',
+				'Tus fotos están a salvo, pero tendrás que volver a diseñar las páginas.',
 			),
 		).toBeInTheDocument()
 		await fireEvent.click(
-			within(dialog).getByRole('button', { name: 'Cambiar' }),
+			within(dialog).getByRole('button', { name: 'Cambiar de producto' }),
 		)
 
 		expect(
@@ -284,7 +284,7 @@ describe('Worksheet screen', () => {
 
 		await fireEvent.click(
 			within(screen.getByRole('alertdialog')).getByRole('button', {
-				name: 'Cambiar',
+				name: 'Cambiar de producto',
 			}),
 		)
 

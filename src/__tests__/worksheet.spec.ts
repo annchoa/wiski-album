@@ -16,12 +16,12 @@ vi.mock('../lib/readPhoto', () => ({
 	},
 }))
 
-function quickPreview() {
+function thumbnailPanel() {
 	return within(screen.getByRole('group', { name: 'Páginas' }))
 }
 
 function currentPageButton() {
-	return quickPreview()
+	return thumbnailPanel()
 		.getAllByRole('button')
 		.find((button) => button.getAttribute('aria-current') === 'page')
 }
@@ -153,10 +153,10 @@ describe('Worksheet screen', () => {
 
 	it('moves between pages with the arrows and disables them at the ends', async () => {
 		await renderWorksheet('/worksheet/wiski-route')
-		const previous = quickPreview().getByRole('button', {
+		const previous = thumbnailPanel().getByRole('button', {
 			name: 'Página anterior',
 		})
-		const next = quickPreview().getByRole('button', {
+		const next = thumbnailPanel().getByRole('button', {
 			name: 'Página siguiente',
 		})
 		expect(previous).toBeDisabled()
@@ -170,14 +170,14 @@ describe('Worksheet screen', () => {
 		expect(next).toBeDisabled()
 	})
 
-	it('picks the page to edit from its thumbnail in the quick preview', async () => {
+	it('picks the page to edit from its thumbnail in the thumbnail panel', async () => {
 		await renderWorksheet('/worksheet/wiski-route')
 		expect(
-			quickPreview().getAllByRole('button', { name: /^Página \d+\b/ }),
+			thumbnailPanel().getAllByRole('button', { name: /^Página \d+\b/ }),
 		).toHaveLength(20)
 
 		await fireEvent.click(
-			quickPreview().getByRole('button', { name: /^Página 7\b/ }),
+			thumbnailPanel().getByRole('button', { name: /^Página 7\b/ }),
 		)
 
 		expect(currentPageButton()).toHaveAccessibleName(/^Página 7\b/)

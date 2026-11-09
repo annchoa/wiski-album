@@ -61,5 +61,5 @@ How a Page uses its space: `framed` (margins around the Slots and a gap between 
 The row of Template thumbnails below the Worksheet from which the user picks the Template for the current Page. Its thumbnails follow the Margins mode of the current Page.
 _Avoid_: Template carousel, template gallery
 
-**Quick preview**:
+**Thumbnail panel**:
 The row of Page thumbnails in the top bar, with arrows on both sides, from which the user picks the Page to edit. Each thumbnail shows the Page with its Photos and its number; the current Page has a marked border.

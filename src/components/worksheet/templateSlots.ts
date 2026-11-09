@@ -12,7 +12,7 @@ const grids: Record<string, string> = {
 
 const pageSpacing = 'gap-4 p-8'
 const thumbSpacing = 'gap-0.5 p-[5px]'
-const quickPreviewSpacing = 'gap-0.5 p-[3px]'
+const thumbnailPanelSpacing = 'gap-0.5 p-[3px]'
 
 function spacing(margins: Margins, framed: string) {
 	return margins === 'full-bleed' ? 'gap-0 p-0' : framed
@@ -22,8 +22,8 @@ export function slotsOnPage(templateId: string, margins: Margins) {
 	return `${grids[templateId]} ${spacing(margins, pageSpacing)}`
 }
 
-export function slotsInQuickPreview(templateId: string, margins: Margins) {
-	return `${grids[templateId]} ${spacing(margins, quickPreviewSpacing)}`
+export function slotsInThumbnailPanel(templateId: string, margins: Margins) {
+	return `${grids[templateId]} ${spacing(margins, thumbnailPanelSpacing)}`
 }
 
 export function slotsInThumbnail(templateId: string, margins: Margins) {

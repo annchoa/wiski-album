@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PhCaretLeft, PhCaretRight } from '@phosphor-icons/vue'
 import { useTemplateRef, watch } from 'vue'
-import { slotsInQuickPreview } from '@/components/worksheet/templateSlots'
+import { slotsInThumbnailPanel } from '@/components/worksheet/templateSlots'
 import {
 	isEmpty,
 	type Page,
@@ -46,7 +46,7 @@ watch(
 </script>
 
 <template>
-  <div role="group" :aria-label="$t('editor.quickPreview.label')" class="flex min-w-0 items-start gap-3">
+  <div role="group" :aria-label="$t('editor.thumbnailPanel.label')" class="flex min-w-0 items-start gap-3">
     <button
       type="button"
       :aria-label="$t('editor.previousPage')"
@@ -63,14 +63,14 @@ watch(
         <button
           type="button"
           :aria-current="index === current ? 'page' : undefined"
-          :aria-label="$t(isEmpty(page) ? 'editor.quickPreview.emptyPage' : 'editor.quickPreview.page', { number: index + 1 })"
+          :aria-label="$t(isEmpty(page) ? 'editor.thumbnailPanel.emptyPage' : 'editor.thumbnailPanel.page', { number: index + 1 })"
           class="flex flex-col items-center gap-1"
           @click="$emit('select', index)"
         >
           <span
             aria-hidden="true"
             class="grid h-[52px] overflow-hidden rounded bg-white"
-            :class="[slotsInQuickPreview(page.templateId, page.margins), index === current ? 'border-2 border-neutral-950' : 'border border-neutral-200']"
+            :class="[slotsInThumbnailPanel(page.templateId, page.margins), index === current ? 'border-2 border-neutral-950' : 'border border-neutral-200']"
             :style="{ aspectRatio }"
           >
             <span v-for="(photo, slot) in page.slots" :key="slot" class="min-h-0 min-w-0 overflow-hidden" :class="photo ? 'bg-neutral-300' : 'bg-neutral-200'">

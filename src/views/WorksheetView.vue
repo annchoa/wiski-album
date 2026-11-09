@@ -38,7 +38,7 @@ import { useRouter } from 'vue-router'
 import AssetPanelPhoto from '@/components/worksheet/AssetPanelPhoto.vue'
 import DropArea from '@/components/worksheet/DropArea.vue'
 import PanelOverlay from '@/components/worksheet/PanelOverlay.vue'
-import QuickPreview from '@/components/worksheet/QuickPreview.vue'
+import ThumbnailPanel from '@/components/worksheet/ThumbnailPanel.vue'
 import SlotCell from '@/components/worksheet/SlotCell.vue'
 import TrashOverlay from '@/components/worksheet/TrashOverlay.vue'
 import {
@@ -242,7 +242,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
         </div>
 
         <div aria-hidden="true" class="w-[200px] shrink-0" />
-        <QuickPreview
+        <ThumbnailPanel
           class="max-w-[816px] flex-1"
           :pages="worksheet.pages"
           :current="worksheet.currentPage"

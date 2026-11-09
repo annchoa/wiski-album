@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
-import QuickPreview from '../components/worksheet/QuickPreview.vue'
+import ThumbnailPanel from '../components/worksheet/ThumbnailPanel.vue'
 import { createWikiI18n } from '../i18n'
 import type { Page, Photo } from '../lib/worksheet'
 
@@ -16,8 +16,8 @@ function aPage(slots: (Photo | null)[]): Page {
 	return { templateId: 'single', margins: 'full-bleed', slots }
 }
 
-function renderQuickPreview(pages: Page[], current = 0) {
-	return render(QuickPreview, {
+function renderThumbnailPanel(pages: Page[], current = 0) {
+	return render(ThumbnailPanel, {
 		props: {
 			pages,
 			current,
@@ -28,9 +28,9 @@ function renderQuickPreview(pages: Page[], current = 0) {
 	})
 }
 
-describe('Quick preview', () => {
+describe('Thumbnail panel', () => {
 	it('tells a page with photos from an empty one and shows the photo only on the first', () => {
-		const { container } = renderQuickPreview([aPage([photo]), aPage([null])])
+		const { container } = renderThumbnailPanel([aPage([photo]), aPage([null])])
 
 		const withPhotos = screen.getByRole('button', { name: 'Página 1' })
 		const empty = screen.getByRole('button', { name: 'Página 2, vacía' })
@@ -43,7 +43,7 @@ describe('Quick preview', () => {
 	})
 
 	it('asks for the page of the clicked thumbnail', async () => {
-		const { emitted } = renderQuickPreview([aPage([null]), aPage([null])])
+		const { emitted } = renderThumbnailPanel([aPage([null]), aPage([null])])
 
 		await fireEvent.click(
 			screen.getByRole('button', { name: 'Página 2, vacía' }),

@@ -18,7 +18,7 @@ const messages = {
 			pay: 'Pagar',
 			editCover: 'Editar portada',
 			previewPdf: 'Vista previa del PDF',
-			quickPreview: {
+			thumbnailPanel: {
 				label: 'Páginas',
 				page: 'Página {number}',
 				emptyPage: 'Página {number}, vacía',
@@ -90,7 +90,7 @@ const messages = {
 			pay: 'Pay',
 			editCover: 'Edit cover',
 			previewPdf: 'Preview PDF',
-			quickPreview: {
+			thumbnailPanel: {
 				label: 'Pages',
 				page: 'Page {number}',
 				emptyPage: 'Page {number}, empty',

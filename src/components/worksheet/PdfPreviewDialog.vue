@@ -34,6 +34,19 @@ const emit = defineEmits<{ 'update:open': [open: boolean] }>()
 const { t } = useI18n()
 
 const pageWidthPx = 340
+const pageHeightPx = computed(() =>
+	Math.round((pageWidthPx * props.product.heightCm) / props.product.widthCm),
+)
+// The dialog has its final size from the start, so it does not jump when the pages load.
+// Sizes in px: two pages, the gap between them (4) and the padding (16); then two arrows (40) with their gaps (16).
+const stageSize = computed(() => ({
+	width: 2 * pageWidthPx + 4 + 16,
+	height: pageHeightPx.value + 16,
+}))
+const placeholderStyle = computed(() => ({
+	width: `${stageSize.value.width + 2 * (40 + 16)}px`,
+	height: `${stageSize.value.height}px`,
+}))
 
 const status = ref<'building' | 'ready' | 'error'>('building')
 const bytes = ref<Uint8Array | null>(null)
@@ -173,10 +186,20 @@ const controlClass =
           </div>
         </div>
 
-        <p v-if="status === 'building'" role="status" class="py-24 text-center text-sm text-neutral-500">
+        <p
+          v-if="status === 'building'"
+          role="status"
+          :style="placeholderStyle"
+          class="flex items-center justify-center text-center text-sm text-neutral-500"
+        >
           {{ $t('editor.pdfPreview.building') }}
         </p>
-        <p v-else-if="status === 'error'" role="alert" class="py-24 text-center text-sm text-neutral-500">
+        <p
+          v-else-if="status === 'error'"
+          role="alert"
+          :style="placeholderStyle"
+          class="flex items-center justify-center text-center text-sm text-neutral-500"
+        >
           {{ $t('editor.pdfPreview.error') }}
         </p>
         <div v-else class="flex items-center justify-center gap-4">
@@ -197,6 +220,7 @@ const controlClass =
                 :ref="(element) => (canvases[side] = element as HTMLCanvasElement | null)"
                 role="img"
                 :aria-label="$t('editor.pdfPreview.page', { number: pageIndex + 1 })"
+                :style="{ width: `${pageWidthPx}px`, height: `${pageHeightPx}px` }"
                 class="bg-white"
               />
               <div v-else aria-hidden="true" :style="{ width: `${pageWidthPx}px` }" />

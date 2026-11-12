@@ -231,7 +231,7 @@ describe('Worksheet screen', () => {
 		})
 		expect(
 			within(dialog).getByText(
-				'Tus fotos están a salvo, pero tendrás que volver a diseñar las páginas.',
+				'Tus fotos están a salvo, pero tendrás que volver a diseñar las páginas y la portada.',
 			),
 		).toBeInTheDocument()
 		await fireEvent.click(

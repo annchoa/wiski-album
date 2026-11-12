@@ -172,6 +172,16 @@ describe('Cover model', () => {
 		expect(cover.dateLine?.text).toBe('noviembre 2026')
 	})
 
+	it('keeps the old text when the new one is empty', () => {
+		const cover = aCover()
+
+		cover.setText('title', '')
+		cover.setText('dateLine', '   ')
+
+		expect(cover.title?.text).toBe('Mi destino favorito')
+		expect(cover.dateLine?.text).toBe('noviembre 2026')
+	})
+
 	it('starts with the default Illustration, with its proportion', () => {
 		const cover = aCover()
 

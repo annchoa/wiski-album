@@ -83,7 +83,7 @@ const messages = {
 			changeProduct: {
 				title: '¿Cambiar de producto?',
 				message:
-					'Tus fotos están a salvo, pero tendrás que volver a diseñar las páginas.',
+					'Tus fotos están a salvo, pero tendrás que volver a diseñar las páginas y la portada.',
 				cancel: 'Cancelar',
 				confirm: 'Cambiar de producto',
 			},
@@ -182,7 +182,7 @@ const messages = {
 			changeProduct: {
 				title: 'Change product?',
 				message:
-					'Your photos are safe, but you will need to redesign your pages.',
+					'Your photos are safe, but you will need to redesign your pages and your cover.',
 				cancel: 'Cancel',
 				confirm: 'Change product',
 			},

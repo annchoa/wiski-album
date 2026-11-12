@@ -166,8 +166,9 @@ export function createCover(initial: {
 		},
 
 		setText(id: 'title' | 'dateLine', text: string) {
+			// An empty text would collapse to no height and could not be selected again.
 			const element = cover[id]
-			if (element) element.text = text
+			if (element && text.trim() !== '') element.text = text
 		},
 
 		setTextHeight(id: 'title' | 'dateLine', height: number) {

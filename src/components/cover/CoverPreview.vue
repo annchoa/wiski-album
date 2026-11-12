@@ -15,6 +15,7 @@ import {
 import type { Point } from '@/lib/geometry'
 import { type Box, dragHandle, type Handle, handles } from '@/lib/handles'
 import { illustrationUrl } from '@/lib/illustrations'
+import { titleWeight } from '@/lib/typefaces'
 
 type TextId = 'title' | 'dateLine'
 
@@ -66,7 +67,7 @@ function textStyle(id: TextId) {
 		fontSize: `${text.fontSize * 100}cqw`,
 		fontFamily: `'${text.typeface}'`,
 		// The Title is bold in the design; the Date line is regular.
-		fontWeight: id === 'title' ? 700 : 400,
+		fontWeight: id === 'title' ? titleWeight(text.typeface) : 400,
 		color: props.cover.colorScheme.textColor,
 	}
 }

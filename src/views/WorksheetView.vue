@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
+	PhBook,
 	PhBookOpen,
 	PhCaretDown,
-	PhBook,
 	PhCheck,
 	PhCreditCard,
 	PhEye,
@@ -34,7 +34,10 @@ import {
 	useTemplateRef,
 	watch,
 } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import CoverPreview from '@/components/cover/CoverPreview.vue'
+import ToolPanel from '@/components/cover/ToolPanel.vue'
 import AssetPanelPhoto from '@/components/worksheet/AssetPanelPhoto.vue'
 import DropArea from '@/components/worksheet/DropArea.vue'
 import PanelOverlay from '@/components/worksheet/PanelOverlay.vue'
@@ -46,6 +49,8 @@ import {
 	slotsInThumbnail,
 	slotsOnPage,
 } from '@/components/worksheet/templateSlots'
+import { createCover } from '@/lib/cover'
+import { dateLine } from '@/lib/dateLine'
 import { distributeInColumns } from '@/lib/masonry'
 import { getProduct, type Product, products } from '@/lib/products'
 import { readPhoto } from '@/lib/readPhoto'
@@ -60,13 +65,31 @@ import {
 const props = defineProps<{ productId: string }>()
 
 const router = useRouter()
+const { t, locale } = useI18n()
 const worksheet = createWorksheet(getProduct(props.productId))
+
+function newCover() {
+	return createCover({
+		title: t('editor.cover.defaultTitle'),
+		dateLine: dateLine(new Date(), locale.value),
+		sheetHeight: worksheet.product.heightCm / worksheet.product.widthCm,
+	})
+}
+const cover = ref(newCover())
+const isEditingCover = ref(false)
+const selectedCoverText = computed(() => {
+	const { selected } = cover.value
+	return selected === 'title' || selected === 'dateLine'
+		? cover.value[selected]
+		: null
+})
 // The browser history can move between products without remounting this view.
 watch(
 	() => props.productId,
 	(productId) => {
 		if (productId !== worksheet.product.id) {
 			worksheet.changeProduct(getProduct(productId))
+			cover.value = newCover()
 		}
 	},
 )
@@ -80,7 +103,12 @@ const marginsModes: Margins[] = ['framed', 'full-bleed']
 
 // Full bleed has no gap, so each slot of a thumbnail needs its own tone.
 // Written out in full because Tailwind scans this file.
-const fullBleedThumbnailTones = ['bg-neutral-300', 'bg-neutral-600', 'bg-neutral-800', 'bg-neutral-400']
+const fullBleedThumbnailTones = [
+	'bg-neutral-300',
+	'bg-neutral-600',
+	'bg-neutral-800',
+	'bg-neutral-400',
+]
 
 const pageElement = useTemplateRef<HTMLElement>('pageElement')
 const { width: pageWidthPx } = useElementSize(pageElement, undefined, {
@@ -114,6 +142,7 @@ function chooseProduct(product: Product) {
 function confirmProductChange() {
 	if (pendingProduct.value) {
 		worksheet.changeProduct(pendingProduct.value)
+		cover.value = newCover()
 		router.replace(`/worksheet/wiski-${pendingProduct.value.id}`)
 	}
 	pendingProduct.value = null
@@ -246,6 +275,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
 
         <div aria-hidden="true" class="w-[200px] shrink-0" />
         <ThumbnailPanel
+          v-if="!isEditingCover"
           class="max-w-[816px] flex-1"
           :pages="worksheet.pages"
           :current="worksheet.currentPage"
@@ -259,6 +289,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
 
       <div class="flex min-h-0 flex-1">
         <DropArea
+          v-if="!isEditingCover"
           as="aside"
           :target="{ kind: 'asset-panel' }"
           :external="{ files: 'image/*' }"
@@ -331,10 +362,23 @@ function handleDrop({ active, over }: DnDEndEvent) {
             </label>
           </div>
         </DropArea>
+        <ToolPanel
+          v-else
+          class="border-r border-neutral-200"
+          :selected="cover.selected"
+          :color-scheme="cover.colorScheme"
+          :typeface-name="selectedCoverText?.typeface ?? ''"
+          :selected-text="selectedCoverText?.text ?? ''"
+          @select-color-scheme="cover.setColorScheme"
+          @select-typeface="cover.setTypeface"
+          @select-illustration="cover.addIllustration"
+          @done="isEditingCover = false"
+        />
 
         <div class="flex min-w-0 flex-1 flex-col">
         <section :aria-label="$t('editor.worksheet')" class="relative flex min-h-0 flex-1 items-center justify-center bg-neutral-100">
           <div
+            v-if="!isEditingCover"
             ref="pageElement"
             class="h-[540px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
             :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
@@ -355,6 +399,10 @@ function handleDrop({ active, over }: DnDEndEvent) {
             </ul>
           </div>
 
+          <div v-else class="flex h-[540px]">
+            <CoverPreview :cover="cover" :sheet-height="worksheet.product.heightCm / worksheet.product.widthCm" />
+          </div>
+
           <!-- PROTOTYPE: order buttons without behavior, to feel the interaction. Delete or replace. -->
           <div class="absolute right-8 bottom-5 flex flex-col items-center gap-2.5">
             <button
@@ -369,7 +417,9 @@ function handleDrop({ active, over }: DnDEndEvent) {
               type="button"
               :aria-label="$t('editor.editCover')"
               :title="$t('editor.editCover')"
-              class="flex size-14 items-center justify-center rounded-full border border-border bg-background text-primary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+              :aria-pressed="isEditingCover"
+              class="flex size-14 items-center justify-center rounded-full border border-border bg-background text-primary shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none aria-pressed:border-2 aria-pressed:border-neutral-950"
+              @click="isEditingCover = !isEditingCover"
             >
               <PhBook aria-hidden="true" class="size-7" />
             </button>
@@ -385,7 +435,7 @@ function handleDrop({ active, over }: DnDEndEvent) {
           </div>
         </section>
 
-        <div class="flex h-[72px] shrink-0 items-center justify-center gap-6 border-t border-neutral-200 px-4">
+        <div v-if="!isEditingCover" class="flex h-[72px] shrink-0 items-center justify-center gap-6 border-t border-neutral-200 px-4">
           <div aria-hidden="true" class="w-[200px] shrink-0" />
             <div role="radiogroup" :aria-label="$t('editor.templates.label')" class="flex items-center justify-center gap-2">
               <button

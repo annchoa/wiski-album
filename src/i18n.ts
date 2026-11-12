@@ -17,6 +17,21 @@ const messages = {
 			trash: 'Papelera',
 			pay: 'Pagar',
 			editCover: 'Editar portada',
+			cover: {
+				defaultTitle: 'Mi destino favorito',
+				colors: 'Colores',
+				typefaces: 'Tipografías',
+				illustrations: 'Ilustraciones',
+				colorScheme: 'Color {number}',
+				illustration: 'Ilustración {number}',
+				selectText: 'Selecciona un texto',
+				done: 'Listo',
+				preview: 'Vista previa de la portada',
+				selectionBox: 'Elemento seleccionado',
+				delete: 'Borrar',
+				editText: 'Texto de la portada',
+				illustrationLabel: 'Ilustración de la portada',
+			},
 			previewPdf: 'Vista previa del PDF',
 			quickPreview: {
 				notice:
@@ -104,6 +119,21 @@ const messages = {
 			trash: 'Trash',
 			pay: 'Pay',
 			editCover: 'Edit cover',
+			cover: {
+				defaultTitle: 'My favorite destination',
+				colors: 'Colors',
+				typefaces: 'Typefaces',
+				illustrations: 'Illustrations',
+				colorScheme: 'Color {number}',
+				illustration: 'Illustration {number}',
+				selectText: 'Select a text',
+				done: 'Done',
+				preview: 'Cover preview',
+				selectionBox: 'Selected element',
+				delete: 'Delete',
+				editText: 'Cover text',
+				illustrationLabel: 'Cover illustration',
+			},
 			previewPdf: 'Preview PDF',
 			quickPreview: {
 				notice:

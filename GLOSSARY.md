@@ -118,3 +118,21 @@ The box around the selected Title, Date line or Illustration in the Cover previe
 **Handle**:
 A point on a Selection box. A corner Handle scales a text and its letters, or scales the Illustration. A side Handle changes the width of a text box, and the text wraps again.
 
+**Letter size**:
+The size of the letters of a text of the Cover, shown in pt. The user changes it in the Tool panel or with a corner Handle.
+_Avoid_: Font size
+
+**Line spacing**:
+The space between the lines of a text of the Cover, as a multiple of its Letter size.
+_Avoid_: Leading, line height
+
+**Letter spacing**:
+The space between the letters of a text of the Cover, in thousandths of an em. 0 is the normal spacing of the Typeface.
+_Avoid_: Tracking, kerning
+
+**Underline** / **Strikethrough**:
+A line under the letters of a text of the Cover, or through them. Each one is on or off for the whole text.
+
+**Alignment**:
+How the lines of a text of the Cover sit in its box: left, center or right.
+_Avoid_: Justification

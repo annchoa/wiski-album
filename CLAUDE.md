@@ -8,7 +8,7 @@ Design desktop screens at 1440×768 so the page never scrolls; only inner areas 
 
 ## UI text
 
-Every user-visible string, `aria-label` and tooltip goes through `src/i18n.ts` in `es` and `en`, even where no language switch exists yet. Editor controls are icon-only: the text lives in the `aria-label` and the tooltip.
+Every user-visible string, `aria-label` and tooltip goes through `src/i18n.ts` in `es` and `en`, even where no language switch exists yet. Editor controls are icon-only: the text lives in the `aria-label` and the tooltip. Exception: the Tool menu of Cover editing has text labels.
 
 ## Icons
 
@@ -43,9 +43,14 @@ Tests cannot judge how a PDF looks. Build a sample from a throwaway `.ts` file w
 
 - `onClickOutside` (`@vueuse/core`) ignores a second click in the same macrotask and needs a `pointerdown` first: `await` a `setTimeout` between opening the menu and clicking outside.
 - `reka-ui` dialogs unmount a moment after closing, and the rest of the page stays `aria-hidden` until then: assert with `findBy*` or `vi.waitFor`.
+- A shortcut test must send the key to `document.activeElement`, not to the component root. `@pointerdown.prevent` stops the browser from focusing the element, so the key never arrives while the test still passes. `CoverPreview.spec.ts` has an example.
 - Real drags cannot be simulated in happy-dom: check them in Chrome (see Visual check).
 - happy-dom has no layout: `useElementSize` reads `NaN` or `0` and its `ResizeObserver` never reports a size. Stub `ResizeObserver` so it reports one on `observe`, as `slotSizedInPixels` does in `SlotCell.spec.ts`, and pass `box: 'border-box'` to `useElementSize` (the default content-box path turns empty padding strings into `NaN`).
 - The `dev` container runs Node 20 and `pdfjs-dist` needs Node ≥ 22.13: read a PDF in tests with `pdf-lib` (`src/__tests__/pdfContent.ts`). Keep `pdfjs-dist` behind `src/lib/renderPdf.ts` and mock that module in component tests.
+
+## Specs
+
+Every new spec in `specs/` gets a row in `specs/index.md` with state `pending`. The **Resumen** column has at most 2 sentences about where the spec stands. Update it when the state changes.
 
 ## Formatting
 

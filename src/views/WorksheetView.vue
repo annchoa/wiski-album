@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {
+	PhArrowsIn,
+	PhArrowsOut,
 	PhBook,
 	PhBookOpen,
 	PhCaretDown,
@@ -101,6 +103,7 @@ const currentMargins = computed(
 	() => worksheet.pages[worksheet.currentPage]?.margins ?? 'full-bleed',
 )
 const marginsModes: Margins[] = ['framed', 'full-bleed']
+const marginsIcons = { framed: PhArrowsIn, 'full-bleed': PhArrowsOut }
 
 // Full bleed has no gap, so each slot of a thumbnail needs its own tone.
 // Written out in full because Tailwind scans this file.
@@ -344,10 +347,10 @@ function handleDrop({ active, over }: DnDEndEvent) {
               :target="{ kind: 'trash' }"
               :overlay="TrashOverlay"
               :title="$t('editor.trash')"
-              class="absolute bottom-[91px] left-4 flex size-11 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12)] data-[over=true]:border-neutral-900 data-[over=true]:bg-neutral-900 data-[over=true]:text-white"
+              class="absolute bottom-[26px] left-[298px] flex size-[76px] items-center justify-center rounded-full border border-neutral-200 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12)] data-[over=true]:border-neutral-900 data-[over=true]:bg-neutral-900 data-[over=true]:text-white"
               @drop="handleDrop"
             >
-              <PhTrash aria-hidden="true" class="size-5" />
+              <PhTrash aria-hidden="true" class="size-9" />
               <span class="sr-only">{{ $t('editor.trash') }}</span>
             </DropArea>
           </div>
@@ -378,26 +381,70 @@ function handleDrop({ active, over }: DnDEndEvent) {
 
         <div class="flex min-w-0 flex-1 flex-col">
         <section :aria-label="$t('editor.worksheet')" class="relative flex min-h-0 flex-1 items-center justify-center bg-neutral-100">
-          <div
-            v-if="!isEditingCover"
-            ref="pageElement"
-            class="h-[540px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
-            :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
-          >
-            <ul class="grid h-full w-full" :class="slotsOnPage(currentTemplateId ?? '', currentMargins)">
-              <SlotCell
-                v-for="slot in currentPageSlots"
-                :key="slot.key"
-                :photo="slot.photo"
-                :address="slot.address"
-                :position-and-zoom="slot.positionAndZoom"
-                :cm-per-pixel="cmPerPixel"
-                @zoom="(zoom) => worksheet.setZoom(slot.address, zoom)"
-                @reset="worksheet.resetPositionAndZoom(slot.address)"
-                @position="(position) => worksheet.setPosition(slot.address, position)"
-                @drop="handleDrop"
-              />
-            </ul>
+          <div v-if="!isEditingCover" class="relative">
+            <div
+              ref="pageElement"
+              class="h-[540px] bg-white shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
+              :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
+            >
+              <ul class="grid h-full w-full" :class="slotsOnPage(currentTemplateId ?? '', currentMargins)">
+                <SlotCell
+                  v-for="slot in currentPageSlots"
+                  :key="slot.key"
+                  :photo="slot.photo"
+                  :address="slot.address"
+                  :position-and-zoom="slot.positionAndZoom"
+                  :cm-per-pixel="cmPerPixel"
+                  @zoom="(zoom) => worksheet.setZoom(slot.address, zoom)"
+                  @reset="worksheet.resetPositionAndZoom(slot.address)"
+                  @position="(position) => worksheet.setPosition(slot.address, position)"
+                  @drop="handleDrop"
+                />
+              </ul>
+            </div>
+
+            <div
+              class="absolute top-1/2 right-full mr-3.5 flex -translate-y-1/2 flex-col items-center gap-2 rounded-lg border border-neutral-200 bg-white p-2 shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
+            >
+              <div role="group" :aria-label="$t('editor.margins.label')" class="flex gap-1">
+                <button
+                  v-for="margins in marginsModes"
+                  :key="margins"
+                  type="button"
+                  :aria-label="$t(`editor.margins.${margins}`)"
+                  :title="$t(`editor.margins.${margins}`)"
+                  :aria-pressed="margins === currentMargins"
+                  class="flex size-8 items-center justify-center rounded-lg border border-neutral-200 bg-white aria-pressed:border-neutral-900 aria-pressed:bg-neutral-900 aria-pressed:text-white"
+                  @click="worksheet.changeMargins(worksheet.currentPage, margins)"
+                >
+                  <component :is="marginsIcons[margins]" aria-hidden="true" class="size-4" />
+                </button>
+              </div>
+              <div aria-hidden="true" class="h-px w-full bg-neutral-200" />
+              <div role="radiogroup" :aria-label="$t('editor.templates.label')" class="flex flex-col items-center gap-2">
+                <button
+                  v-for="template in templates"
+                  :key="template.id"
+                  type="button"
+                  role="radio"
+                  :aria-checked="template.id === currentTemplateId"
+                  :aria-label="$t(`editor.templates.${template.id}`)"
+                  :title="$t(`editor.templates.${template.id}`)"
+                  class="h-[34px] overflow-hidden rounded-md border border-neutral-200 bg-white aria-checked:border-2 aria-checked:border-neutral-900"
+                  :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
+                  @click="worksheet.changeTemplate(worksheet.currentPage, template.id)"
+                >
+                  <span class="grid h-full w-full" :class="slotsInThumbnail(template.id, currentMargins)">
+                    <span
+                      v-for="slot in template.slotCount"
+                      :key="slot"
+                      class="rounded-[1px]"
+                      :class="currentMargins === 'full-bleed' ? fullBleedThumbnailTones[slot - 1] : 'bg-neutral-300'"
+                    />
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div v-else class="flex h-[540px]">
@@ -436,46 +483,6 @@ function handleDrop({ active, over }: DnDEndEvent) {
           </div>
         </section>
 
-        <div v-if="!isEditingCover" class="flex h-[72px] shrink-0 items-center justify-center gap-6 border-t border-neutral-200 px-4">
-          <div aria-hidden="true" class="w-[200px] shrink-0" />
-            <div role="radiogroup" :aria-label="$t('editor.templates.label')" class="flex items-center justify-center gap-2">
-              <button
-                v-for="template in templates"
-                :key="template.id"
-                type="button"
-                role="radio"
-                :aria-checked="template.id === currentTemplateId"
-                :aria-label="$t(`editor.templates.${template.id}`)"
-                :title="$t(`editor.templates.${template.id}`)"
-                class="h-11 overflow-hidden rounded-md border border-neutral-200 bg-white aria-checked:border-2 aria-checked:border-neutral-900"
-            :style="{ aspectRatio: `${worksheet.product.widthCm} / ${worksheet.product.heightCm}` }"
-                @click="worksheet.changeTemplate(worksheet.currentPage, template.id)"
-              >
-                <span class="grid h-full w-full" :class="slotsInThumbnail(template.id, currentMargins)">
-                  <span
-                    v-for="slot in template.slotCount"
-                    :key="slot"
-                    class="rounded-[1px]"
-                    :class="currentMargins === 'full-bleed' ? fullBleedThumbnailTones[slot - 1] : 'bg-neutral-300'"
-                  />
-                </span>
-              </button>
-            </div>
-          <div role="radiogroup" :aria-label="$t('editor.margins.label')" class="flex rounded-lg border border-neutral-200 bg-neutral-100 p-0.5">
-            <button
-              v-for="margins in marginsModes"
-              :key="margins"
-              type="button"
-              role="radio"
-              :aria-checked="margins === currentMargins"
-              class="h-[30px] rounded-md px-3 text-[13px] font-medium text-neutral-500 aria-checked:border aria-checked:border-neutral-200 aria-checked:bg-white aria-checked:font-semibold aria-checked:text-neutral-950"
-              @click="worksheet.changeMargins(worksheet.currentPage, margins)"
-            >
-              {{ $t(`editor.margins.${margins}`) }}
-            </button>
-          </div>
-          <div aria-hidden="true" class="w-[200px] shrink-0" />
-        </div>
         </div>
       </div>
     </div>

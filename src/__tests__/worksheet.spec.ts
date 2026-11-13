@@ -185,25 +185,29 @@ describe('Worksheet screen', () => {
 
 	it('shows the margins mode of the current page and changes only that page', async () => {
 		await renderWorksheet('/worksheet/wiski-moment')
-		const margins = within(screen.getByRole('radiogroup', { name: 'Márgenes' }))
-		expect(
-			margins.getByRole('radio', { name: 'A sangre completa' }),
-		).toBeChecked()
+		const margins = within(screen.getByRole('group', { name: 'Márgenes' }))
+		const framed = () => margins.getByRole('button', { name: 'Con margen' })
+		const fullBleed = () =>
+			margins.getByRole('button', { name: 'A sangre completa' })
+		expect(fullBleed()).toHaveAttribute('aria-pressed', 'true')
+		expect(framed()).toHaveAttribute('aria-pressed', 'false')
 
-		await fireEvent.click(margins.getByRole('radio', { name: 'Con margen' }))
-		expect(margins.getByRole('radio', { name: 'Con margen' })).toBeChecked()
+		await fireEvent.click(framed())
+		expect(framed()).toHaveAttribute('aria-pressed', 'true')
+		expect(fullBleed()).toHaveAttribute('aria-pressed', 'false')
+
+		await fireEvent.click(framed())
+		expect(framed()).toHaveAttribute('aria-pressed', 'true')
 
 		await fireEvent.click(
 			screen.getByRole('button', { name: 'Página siguiente' }),
 		)
-		expect(
-			margins.getByRole('radio', { name: 'A sangre completa' }),
-		).toBeChecked()
+		expect(fullBleed()).toHaveAttribute('aria-pressed', 'true')
 
 		await fireEvent.click(
 			screen.getByRole('button', { name: 'Página anterior' }),
 		)
-		expect(margins.getByRole('radio', { name: 'Con margen' })).toBeChecked()
+		expect(framed()).toHaveAttribute('aria-pressed', 'true')
 	})
 
 	it('shows as many slots on the worksheet as the chosen template has', async () => {

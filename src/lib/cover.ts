@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 import { type ColorScheme, defaultColorScheme } from './colorSchemes'
 import type { Point } from './geometry'
 import { defaultIllustration, type Illustration } from './illustrations'
+import { cmPerInch, lowResolutionBelow } from './resolution'
 import { defaultTypeface } from './typefaces'
 
 export type CoverElementId = 'title' | 'dateLine' | `illustration-${number}`
@@ -43,12 +44,14 @@ export interface CoverIllustration {
 	y: number
 	width: number
 	height: number
+	// The widest the Illustration can be, as a fraction of the sheet width.
+	maxWidth: number
 }
 
 // The narrowest an element can be, as a fraction of the sheet width.
 const minWidth = fraction(54)
 
-// A large Illustration starts as a picture, a small one as an icon of about 30 px.
+// An SVG starts as a picture (large) or as an icon of about 30 px (small).
 function startWidth(illustration: Illustration) {
 	const proportion = illustration.width / illustration.height
 	if (illustration.size === 'large') return fraction(300)
@@ -63,8 +66,23 @@ export function createCover(initial: {
 	title: string
 	dateLine: string
 	sheetHeight: number
+	sheetWidthCm: number
 }) {
 	let nextIllustrationKey = 0
+
+	// A PNG has a fixed number of pixels: wider than this it prints below the
+	// Low resolution limit. An SVG has no limit. Its width is in pixels only for a PNG.
+	function maxWidthOf(illustration: Illustration) {
+		if (illustration.extension !== 'png') return 1
+		const sharpWidthCm = (illustration.width / lowResolutionBelow) * cmPerInch
+		return Math.min(1, sharpWidthCm / initial.sheetWidthCm)
+	}
+
+	// The widest start: the most the Illustration allows, inside the sheet.
+	function widestStart(illustration: Illustration) {
+		const proportion = illustration.width / illustration.height
+		return Math.min(maxWidthOf(illustration), initial.sheetHeight * proportion)
+	}
 
 	function newIllustration(
 		illustration: Illustration,
@@ -79,6 +97,7 @@ export function createCover(initial: {
 			y,
 			width,
 			height: width * (illustration.height / illustration.width),
+			maxWidth: maxWidthOf(illustration),
 		}
 		return placed
 	}
@@ -88,7 +107,10 @@ export function createCover(initial: {
 		box: { x: number; y: number; width: number },
 		proportion: number,
 	) {
-		const widestInSheet = Math.min(1, initial.sheetHeight * proportion)
+		const widestInSheet = Math.min(
+			illustration.maxWidth,
+			initial.sheetHeight * proportion,
+		)
 		illustration.width = clamp(box.width, minWidth, widestInSheet)
 		illustration.height = illustration.width / proportion
 		illustration.x = clamp(box.x, 0, 1 - illustration.width)
@@ -153,7 +175,10 @@ export function createCover(initial: {
 
 		// The new Illustration goes to the center, on top of the others.
 		addIllustration(illustration: Illustration) {
-			const width = startWidth(illustration)
+			const width =
+				illustration.extension === 'png'
+					? widestStart(illustration)
+					: startWidth(illustration)
 			const height = width * (illustration.height / illustration.width)
 			const added = newIllustration(
 				illustration,

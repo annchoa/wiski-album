@@ -10,6 +10,7 @@ function renderCoverPreview() {
 		title: 'Mi destino favorito',
 		dateLine: 'noviembre 2026',
 		sheetHeight: 1,
+		sheetWidthCm: 20,
 	})
 	render(CoverPreview, {
 		props: { cover, sheetHeight: 1 },

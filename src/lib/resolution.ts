@@ -1,6 +1,6 @@
 import type { Size } from './geometry'
 
-const cmPerInch = 2.54
+export const cmPerInch = 2.54
 
 export function printResolution({
 	photo,
@@ -23,7 +23,7 @@ export function printResolution({
 	return coveringSide / zoom
 }
 
-const lowResolutionBelow = 150
+export const lowResolutionBelow = 150
 
 export function isLowResolution(resolution: number | null): boolean {
 	return resolution !== null && resolution < lowResolutionBelow

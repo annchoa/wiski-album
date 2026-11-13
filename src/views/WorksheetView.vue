@@ -73,6 +73,7 @@ function newCover() {
 		title: t('editor.cover.defaultTitle'),
 		dateLine: dateLine(new Date(), locale.value),
 		sheetHeight: worksheet.product.heightCm / worksheet.product.widthCm,
+		sheetWidthCm: worksheet.product.widthCm,
 	})
 }
 const cover = ref(newCover())

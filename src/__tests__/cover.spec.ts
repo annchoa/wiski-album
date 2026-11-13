@@ -20,12 +20,14 @@ function otherColorScheme() {
 
 // A Moment sheet: 20 cm wide and 28 cm high, so 1.4 times its width.
 const sheetHeight = 1.4
+const sheetWidthCm = 20
 
 function aCover() {
 	return createCover({
 		title: 'Mi destino favorito',
 		dateLine: 'noviembre 2026',
 		sheetHeight,
+		sheetWidthCm,
 	})
 }
 
@@ -225,6 +227,62 @@ describe('Cover model', () => {
 		const icon = 30 / 540
 		expect(added.height).toBeCloseTo(icon)
 		expect(added.width).toBeCloseTo(icon / 2)
+	})
+
+	// 600 px print sharp up to 600 / 150 ppi = 4 in = 10.16 cm, half of a 20 cm sheet.
+	const photoIllustration: Illustration = {
+		id: 'photo',
+		size: 'large',
+		width: 600,
+		height: 400,
+		extension: 'png',
+	}
+	const sharpWidth = ((600 / 150) * 2.54) / sheetWidthCm
+
+	it('starts a PNG Illustration at the widest size that still prints sharp', () => {
+		const cover = aCover()
+
+		cover.addIllustration(photoIllustration)
+
+		expect(illustrationOf(cover, 1).width).toBeCloseTo(sharpWidth)
+	})
+
+	it('starts a PNG Illustration with more pixels than the sheet needs at the sheet width', () => {
+		const cover = aCover()
+
+		cover.addIllustration({ ...photoIllustration, width: 3000, height: 3000 })
+
+		expect(illustrationOf(cover, 1).width).toBe(1)
+	})
+
+	it('does not let a PNG Illustration grow past the size that prints sharp', () => {
+		const cover = aCover()
+		cover.addIllustration(photoIllustration)
+		const added = illustrationOf(cover, 1)
+
+		cover.scaleIllustration(added.key, { x: 0, y: 0, width: 0.9 })
+
+		expect(added.width).toBeCloseTo(sharpWidth)
+	})
+
+	it('lets a PNG Illustration shrink', () => {
+		const cover = aCover()
+		cover.addIllustration(photoIllustration)
+		const added = illustrationOf(cover, 1)
+
+		cover.scaleIllustration(added.key, { x: 0, y: 0, width: 0.2 })
+
+		expect(added.width).toBeCloseTo(0.2)
+	})
+
+	it('lets an SVG Illustration grow to the sheet width', () => {
+		const cover = aCover()
+		cover.addIllustration(largeIllustration)
+		const added = illustrationOf(cover, 1)
+
+		cover.scaleIllustration(added.key, { x: 0, y: 0, width: 1 })
+
+		expect(added.width).toBe(1)
 	})
 
 	it('scales an Illustration and keeps its proportion', () => {
